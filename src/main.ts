@@ -66,7 +66,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   }
 
   spawn(name = "moomooapi", skin = SkinColors.brown, moreRes = true) {
-    this.sendBasic("sp", {name: name, skin: skin, moofol: moreRes});
+    this.sendBasic("sp", {name: name, skin: skin, moofoll: moreRes});
   }
 }
 
