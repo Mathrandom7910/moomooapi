@@ -1,10 +1,10 @@
 
 import { EventEmitter, PacketReceiveEvt, PacketSendEvt, PlayerEvents } from "./evt";
-import { msgpack2, SkinColors } from "./misc";
+import { msgpack2, SkinColours } from "./misc";
 import { RawPacket } from "./types";
 
 export class MooMooAPI extends EventEmitter<PlayerEvents>{
-  static SkinColors = SkinColors;
+  static SkinColors = SkinColours;
 
   socket: WebSocket | null = null;
 
@@ -65,7 +65,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.sendRaw([t, payload]);
   }
 
-  spawn(name = "moomooapi", skin = SkinColors.brown, moreRes = true) {
+  spawn(name = "moomooapi", skin = SkinColours.brown, moreRes = true) {
     this.sendBasic("sp", {name: name, skin: skin, moofoll: moreRes});
   }
 }
