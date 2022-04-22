@@ -15,5 +15,6 @@
     "noImplicitReturns": true,
     "allowJs": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  
 }
