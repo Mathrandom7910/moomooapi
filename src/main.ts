@@ -3,7 +3,7 @@ import { EventEmitter, PacketReceiveEvt, PacketSendEvt, PlayerEvents } from "./e
 import { msgpack2 } from "./misc";
 import { RawPacket } from "./types";
 
-class MooMooAPI extends EventEmitter<PlayerEvents>{
+export class MooMooAPI extends EventEmitter<PlayerEvents>{
   socket: WebSocket | null = null;
   constructor() {
     super();
