@@ -4,7 +4,7 @@ import { msgpack2, SkinColours } from "./misc";
 import { RawPacket } from "./types";
 
 export class MooMooAPI extends EventEmitter<PlayerEvents>{
-  static SkinColors = SkinColours;
+  static SkinColours = SkinColours;
 
   socket: WebSocket | null = null;
 

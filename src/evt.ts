@@ -49,17 +49,23 @@ export class EventEmitter<Map> {
         this.events.push(new Eventable(type, cb));
     }
 
-    once(type: string, cb: Function) {
+    once<K extends keyof Map>(type: K, cb: Function) {
         this.events.push(new Eventable(type, cb, false));
     }
 
-    emit(type: string, ...args: any[]) {
+    protected emit<K extends keyof Map>(type: K, ...args: any[]) {
         this.events.filter(evt => {
             if(evt.name != type) return true;
             evt.cb(...args);
-            var t = <any> this;
-            if(t["on" + type] instanceof Function) t["on" + type](...args);
             return !evt.once;
         });
+    }
+
+    rmv<K extends keyof Map>(type: K) {
+        this.events.forEach(e => {
+            if(e.name == type){
+                e.once = true;
+            }
+        })
     }
 }
