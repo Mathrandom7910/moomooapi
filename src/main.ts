@@ -1,7 +1,7 @@
 
 import { EventEmitter, PacketReceiveEvt, PacketSendEvt, PlayerEvents } from "./evt";
 import { msgpack2, SkinColours } from "./misc";
-import { RawPacket } from "./types";
+import { C2SPacketType, RawPacket } from "./packets";
 
 interface WST {
   hiddenSend(data: ArrayBufferLike | string | Blob | ArrayBufferView): void;
@@ -9,6 +9,7 @@ interface WST {
 
 export class MooMooAPI extends EventEmitter<PlayerEvents>{
   public static SkinColours = SkinColours;
+  public static C2SPacketType = C2SPacketType;
 
   socket: WebSocket | null = null;
 
@@ -70,7 +71,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.socket?.send(msgpack2.encode(packet));
   }
 
-  sendBasic(t: string, ...payload: any) {
+  sendBasic(t: C2SPacketType, ...payload: any) {
     this.sendRaw([t, payload]);
   }
 
@@ -80,10 +81,9 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   }
 
   spawn(name = "moomooapi", skin = SkinColours.brown, moreRes = true) {
-    this.sendBasic("sp", {name: name, skin: skin, moofoll: moreRes});
+    this.sendBasic(C2SPacketType.spawn, {name: name, skin: skin, moofoll: moreRes});
   }
 }
-console.log(MooMooAPI);
 
 
 Object.defineProperty(window, "MooMooAPI", {
