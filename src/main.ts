@@ -83,5 +83,9 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.sendBasic("sp", {name: name, skin: skin, moofoll: moreRes});
   }
 }
+console.log(MooMooAPI);
 
-Object.defineProperty(window, "MooMooAPI", MooMooAPI);
+
+Object.defineProperty(window, "MooMooAPI", {
+  value: MooMooAPI
+});

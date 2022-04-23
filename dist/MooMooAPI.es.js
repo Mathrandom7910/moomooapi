@@ -595,5 +595,8 @@ class MooMooAPI extends EventEmitter {
   }
 }
 __publicField(MooMooAPI, "SkinColours", SkinColours);
-Object.defineProperty(window, "MooMooAPI", MooMooAPI);
+console.log(MooMooAPI);
+Object.defineProperty(window, "MooMooAPI", {
+  value: MooMooAPI
+});
 export { MooMooAPI };
