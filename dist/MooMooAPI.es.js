@@ -11,22 +11,31 @@ class Evt {
 class PacketEvt extends Evt {
   constructor(packet) {
     super();
-    __publicField(this, "type");
     __publicField(this, "payload");
     this.packet = packet;
-    this.type = packet[0];
     this.payload = packet[1];
   }
 }
 class PacketReceiveEvt extends PacketEvt {
   constructor(pack) {
     super(pack);
+    __publicField(this, "type");
+    this.type = pack[0];
   }
 }
 class PacketSendEvt extends PacketEvt {
   constructor(pack) {
     super(pack);
+    __publicField(this, "type");
     __publicField(this, "isCanceled", false);
+    this.type = pack[0];
+  }
+}
+class HealthEvent extends Evt {
+  constructor(sid, health) {
+    super();
+    this.sid = sid;
+    this.health = health;
   }
 }
 class Eventable {
@@ -540,10 +549,105 @@ var SkinColours = /* @__PURE__ */ ((SkinColours2) => {
   SkinColours2["secretLightBlue"] = "length";
   return SkinColours2;
 })(SkinColours || {});
+var C2SPacketType = /* @__PURE__ */ ((C2SPacketType2) => {
+  C2SPacketType2["spawn"] = "sp";
+  C2SPacketType2["chat"] = "ch";
+  C2SPacketType2["attack"] = "c";
+  C2SPacketType2["ping"] = "pp";
+  C2SPacketType2["setAngle"] = "2";
+  C2SPacketType2["selectItem"] = "5";
+  C2SPacketType2["upgrade"] = "6";
+  C2SPacketType2["autoAttack"] = "7";
+  C2SPacketType2["createTribe"] = "8";
+  C2SPacketType2["leaveTribe"] = "9";
+  C2SPacketType2["requestJoinTribe"] = "10";
+  C2SPacketType2["acceptTribeRequest"] = "11";
+  C2SPacketType2["kickFromTribe"] = "12";
+  C2SPacketType2["buyFromShop"] = "13c";
+  C2SPacketType2["pingMap"] = "14";
+  C2SPacketType2["move"] = "33";
+  return C2SPacketType2;
+})(C2SPacketType || {});
+var S2CPacketType = /* @__PURE__ */ ((S2CPacketType2) => {
+  S2CPacketType2["announce"] = "ann";
+  S2CPacketType2["init"] = "io-init";
+  S2CPacketType2["initTribe"] = "id";
+  S2CPacketType2["setSid"] = "1";
+  S2CPacketType2["kick"] = "d";
+  S2CPacketType2["addPlayer"] = "2";
+  S2CPacketType2["updatePlayers"] = "33";
+  S2CPacketType2["removePlayer"] = "4";
+  S2CPacketType2["updateLeaderBoard"] = "5";
+  S2CPacketType2["addObject"] = "6";
+  S2CPacketType2["updateAi"] = "a";
+  S2CPacketType2["playerSwing"] = "7";
+  S2CPacketType2["moostafaSwing"] = "aa";
+  S2CPacketType2["wiggle"] = "8";
+  S2CPacketType2["shootTurret"] = "sp";
+  S2CPacketType2["updateMats"] = "9";
+  S2CPacketType2["health"] = "h";
+  S2CPacketType2["death"] = "11";
+  S2CPacketType2["removeBuild"] = "12";
+  S2CPacketType2["removeObject"] = "13";
+  S2CPacketType2["setItemCount"] = "14";
+  S2CPacketType2["setAge"] = "15";
+  S2CPacketType2["listUpgrades"] = "16";
+  S2CPacketType2["setItemsBar"] = "17";
+  S2CPacketType2["addProjectile"] = "18";
+  S2CPacketType2["removeProjectile"] = "19";
+  S2CPacketType2["serverRestart"] = "20";
+  S2CPacketType2["addTribe"] = "ac";
+  S2CPacketType2["deleteTribe"] = "ad";
+  S2CPacketType2["requestJoin"] = "an";
+  S2CPacketType2["setTribe"] = "st";
+  S2CPacketType2["setTribeMembers"] = "sa";
+  S2CPacketType2["minimapLocation"] = "mm";
+  S2CPacketType2["chat"] = "ch";
+  S2CPacketType2["updateShop"] = "us";
+  S2CPacketType2["ping"] = "pp";
+  S2CPacketType2["dmgTest"] = "t";
+  S2CPacketType2["pingMap"] = "p";
+  return S2CPacketType2;
+})(S2CPacketType || {});
+class Player {
+  constructor() {
+    __publicField(this, "x", -2);
+    __publicField(this, "y", -2);
+    __publicField(this, "sid", -2);
+    __publicField(this, "id", "NULL");
+    __publicField(this, "dir", 0);
+    __publicField(this, "obj", -2);
+    __publicField(this, "wep", -2);
+    __publicField(this, "variant", -2);
+    __publicField(this, "tribe", "NULL");
+    __publicField(this, "isLeader", false);
+    __publicField(this, "hat", -2);
+    __publicField(this, "acc", -2);
+    __publicField(this, "isSkull", false);
+    __publicField(this, "zIndex", -1);
+  }
+  assign(dat) {
+    this.x = dat.x;
+    this.y = dat.y;
+    this.sid = dat.sid;
+    this.dir = dat.dir;
+    this.obj = dat.obj;
+    this.wep = dat.wep;
+    this.variant = dat.variant;
+    this.tribe = dat.tribe;
+    this.isLeader = dat.isLeader;
+    this.hat = dat.hat;
+    this.acc = dat.acc;
+    this.isSkull = dat.isSkull;
+    this.zIndex = dat.zIndex;
+  }
+}
 class MooMooAPI extends EventEmitter {
   constructor() {
     super();
     __publicField(this, "socket", null);
+    __publicField(this, "player", new Player());
+    __publicField(this, "players", []);
     var that = this;
     class WS extends WebSocket {
       hiddenSend(data) {
@@ -569,9 +673,47 @@ class MooMooAPI extends EventEmitter {
   initSocket() {
     var _a;
     (_a = this.socket) == null ? void 0 : _a.addEventListener("message", (m) => {
+      var _a2;
       const packEvt = new PacketReceiveEvt(msgpack2.decode(new Uint8Array(m.data)));
       this.emit("packetReceive", packEvt);
       this.onPacketReceive(packEvt);
+      const payload = packEvt.payload;
+      const type = packEvt.type;
+      switch (type) {
+        case S2CPacketType.health:
+          this.emit("health", new HealthEvent(payload[0], payload[1]));
+          break;
+        case S2CPacketType.init:
+          this.player.id = payload[0];
+          break;
+        case S2CPacketType.setSid:
+          this.players[payload[0]] = this.player;
+          this.player.sid = payload[0];
+          break;
+        case S2CPacketType.updatePlayers:
+          for (let i = 0; i < payload[0].length; i += 13) {
+            const plinf = payload[0].slice(i, i + 13);
+            const thisPlayer = {
+              sid: plinf[0],
+              x: plinf[1],
+              y: plinf[2],
+              dir: plinf[3],
+              obj: plinf[4],
+              wep: plinf[5],
+              variant: plinf[6],
+              tribe: plinf[7],
+              isLeader: plinf[8],
+              hat: plinf[9],
+              acc: plinf[10],
+              isSkull: plinf[11],
+              zIndex: plinf[12]
+            };
+            if (!this.players[thisPlayer.sid])
+              this.players[thisPlayer.sid] = new Player();
+            (_a2 = this.players[thisPlayer.sid]) == null ? void 0 : _a2.assign(thisPlayer);
+          }
+          break;
+      }
     });
   }
   onPacketSend(evt) {
@@ -591,11 +733,12 @@ class MooMooAPI extends EventEmitter {
     sock == null ? void 0 : sock.hiddenSend(msgpack2.encode([t, payload]));
   }
   spawn(name = "moomooapi", skin = SkinColours.brown, moreRes = true) {
-    this.sendBasic("sp", { name, skin, moofoll: moreRes });
+    this.sendBasic(C2SPacketType.spawn, { name, skin, moofoll: moreRes });
   }
 }
 __publicField(MooMooAPI, "SkinColours", SkinColours);
-console.log(MooMooAPI);
+__publicField(MooMooAPI, "C2SPacketType", C2SPacketType);
+__publicField(MooMooAPI, "S2CPacketType", S2CPacketType);
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI
 });

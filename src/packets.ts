@@ -79,4 +79,47 @@ export enum C2SPacketType {
     move = "33"
 }
 
-export type RawPacket = [C2SPacketType, [...any]]
+export enum S2CPacketType {
+    announce = "ann",
+    init = "io-init",
+    initTribe = "id",
+    setSid = "1", //sent short after each spawn
+    kick = "d",
+    addPlayer = "2",
+    updatePlayers = "33",
+    removePlayer = "4",
+    updateLeaderBoard = "5",
+    addObject = "6",
+    updateAi = "a",
+    playerSwing = "7",
+    moostafaSwing = "aa",
+    wiggle = "8",
+    shootTurret = "sp",
+    updateMats = "9",
+    health = "h",
+    death = "11",
+    removeBuild = "12",
+    removeObject = "13",
+    setItemCount = "14",
+    setAge = "15",
+    listUpgrades = "16",
+    setItemsBar = "17",
+    addProjectile = "18",
+    removeProjectile = "19",
+    serverRestart = "20",
+    addTribe = "ac",
+    deleteTribe = "ad",
+    requestJoin = "an",
+    setTribe = "st",
+    setTribeMembers = "sa",
+    minimapLocation = "mm",
+    chat = "ch",
+    updateShop = "us",
+    ping = "pp",
+    dmgTest = "t",
+    pingMap = "p"
+}
+
+export type RawPacket = [C2SPacketType | S2CPacketType, [...any[]]]
+export type RawC2SPacket = [C2SPacketType, [...any[]]]
+export type RawS2CPacket = [S2CPacketType, [...any[]]]
