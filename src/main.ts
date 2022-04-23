@@ -17,9 +17,9 @@ interface WST {
  */
 
 export class MooMooAPI extends EventEmitter<PlayerEvents>{
-  public static SkinColours = SkinColours;
-  public static C2SPacketType = C2SPacketType;
-  public static S2CPacketType = S2CPacketType;
+  static SkinColours = SkinColours;
+  static C2SPacketType = C2SPacketType;
+  static S2CPacketType = S2CPacketType;
 
   /**
    * The raw websocket to interact with the game
@@ -123,7 +123,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   }
 
   /**
-   * Called when before a packet is sent to the server
+   * Called before a packet is sent to the server
    * @param evt The packet event containing information
    * @returns boolean value if should cancel the event (true if it should cancel, and false otherwise)
    */

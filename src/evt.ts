@@ -81,7 +81,7 @@ export class EventEmitter<Map> {
         this.events.push(new Eventable(type, cb, false));
     }
 
-    protected emit<K extends keyof Map>(type: K, ...args: any[]) {
+    emit<K extends keyof Map>(type: K, ...args: any[]) {
         this.events.filter(evt => {
             if(evt.name != type) return true;
             evt.cb(...args);
