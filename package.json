@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "build": "tsc && vite build",
-    "docs": "typedoc src/main.ts"
+    "docs": "typedoc src/main.ts src/player.ts src/packets.ts"
   },
   "devDependencies": {
     "typescript": "^4.5.4",
