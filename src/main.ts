@@ -1,20 +1,42 @@
 
 import { EventEmitter, HealthEvent, PacketReceiveEvt, PacketSendEvt, PlayerEvents } from "./evt";
-import { msgpack2, SkinColours } from "./misc";
-import { C2SPacketType, RawPacket, S2CPacketType } from "./packets";
+import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player } from "./player";
+import * as msgpack from "./msgpack"
+import { SkinColours } from "./misc";
+
+var mLoc = <any> msgpack;
+export const msgpack2 = <typeof msgpack> mLoc.msgpack;
 
 interface WST {
   hiddenSend(data: ArrayBufferLike | string | Blob | ArrayBufferView): void;
 }
+
+/**
+ * MooMoo API class, should be constructed BEFORE the websocket connection is open (before page load)
+ */
 
 export class MooMooAPI extends EventEmitter<PlayerEvents>{
   public static SkinColours = SkinColours;
   public static C2SPacketType = C2SPacketType;
   public static S2CPacketType = S2CPacketType;
 
+  /**
+   * The raw websocket to interact with the game
+   */
+
   socket: WebSocket | null = null;
+  
+  /**
+   * Current game player
+   */
+
   player = new Player();
+
+  /**
+   * Array of players that have been onscreen
+   */
+
   players: Player[] | undefined[] = [];
 
   constructor() {
@@ -47,7 +69,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     });
   }
 
-  initSocket() {
+  private initSocket() {
     this.socket?.addEventListener("message", (m) => {
       const packEvt = new PacketReceiveEvt(msgpack2.decode(new Uint8Array(m.data)));
       this.emit("packetReceive", packEvt);
@@ -57,7 +79,11 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
       switch(type) {
         case S2CPacketType.health:
-          this.emit("health", new HealthEvent(payload[0], payload[1]));
+          const sid = payload[0];
+          const health = payload[1];
+          this.emit("health", new HealthEvent(sid, health));
+          const player = this.players[sid]
+          if(player) player.health = health;
         break;
 
         case S2CPacketType.init:
@@ -98,7 +124,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   /**
    * Called when before a packet is sent to the server
-   * @param evt The packet event containing packet info
+   * @param evt The packet event containing information
    * @returns boolean value if should cancel the event (true if it should cancel, and false otherwise)
    */
 
@@ -107,24 +133,53 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     return false;
   }
 
+  /**
+   * Called once the client received a packet from the server
+   * @param evt The packet event containing information
+   */
+
   onPacketReceive(evt: PacketReceiveEvt) {
     evt;
   }
 
-  sendRaw(packet: RawPacket) {
+  /**
+   * Sends a raw packet to the server
+   * @param packet The packet to send
+   */
+
+  sendRaw(packet: RawC2SPacket) {
     this.socket?.send(msgpack2.encode(packet));
   }
+
+  /**
+   * Sends a basic packet to the server, allows easier formatting when dealing with data
+   * @param t The type of packet to send to the server
+   * @param payload Payload of the packet to send
+   */
 
   sendBasic(t: C2SPacketType, ...payload: any) {
     this.sendRaw([t, payload]);
   }
+
+  /**
+   * Sends a packet that does not get picked up by the outgoing packet register, can help with preventing infinite (really big) loops
+   * @param t The type of packet to send to the server
+   * @param payload Payload of the packet to send
+   */
 
   sendHidden(t: string, ...payload: any) {
     var sock = <WST> <unknown> this.socket;
     sock?.hiddenSend(msgpack2.encode([t, payload]));
   }
 
-  spawn(name = "moomooapi", skin = SkinColours.brown, moreRes = true) {
+  /**
+   * Spawn into the game with specified data, recommended to check if dead, as sending this packet multiple times while alive will result in a kick
+   * @param name Name to spawn in game with, several names are blacklisted
+   * @param skin Skin colour to spawn in game with
+   * @param moreRes Whether or not to spawn with more resources
+   */
+
+  spawn(name = "moomooapi", skin = SkinColours.red, moreRes = true) {
     this.sendBasic(C2SPacketType.spawn, {name: name, skin: skin, moofoll: moreRes});
   }
 }

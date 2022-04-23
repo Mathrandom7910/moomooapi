@@ -1,24 +1,27 @@
 import { C2SPacketType, RawC2SPacket, RawPacket, RawS2CPacket, S2CPacketType } from "./packets";
 
-export class Evt {
-    constructor() {
-
+class Evt {
+    constructor(public eventName: string) {
     }
 }
 
-export interface Cancelable {
+interface Cancelable {
     isCanceled: boolean;
 }
+
 
 abstract class PacketEvt extends Evt{
     abstract type: C2SPacketType | S2CPacketType;
     payload: any[];
     constructor(public packet: RawPacket) {
-        super();
-      //  this.type = packet[0];
+        super("packet");
         this.payload = packet[1];
     }
 }
+
+/**
+ * Event for receiving packets
+ */
 
 export class PacketReceiveEvt extends PacketEvt {
     type: S2CPacketType;
@@ -27,6 +30,10 @@ export class PacketReceiveEvt extends PacketEvt {
         this.type = pack[0];
     }
 }
+
+/**
+ * Event for sending packets
+ */
 
 export class PacketSendEvt extends PacketEvt implements Cancelable {
     type: C2SPacketType;
@@ -37,9 +44,13 @@ export class PacketSendEvt extends PacketEvt implements Cancelable {
     }
 }
 
+/**
+ * Health event, used when a player's health changes
+ */
+
 export class HealthEvent extends Evt {
     constructor(public sid: number, public health: number) {
-        super();
+        super("health");
     }
 }
 
@@ -48,6 +59,10 @@ class Eventable {
         
     }
 }
+
+/**
+ * Interface of possible player events to be called
+ */
 
 export interface PlayerEvents {
     packetSend: PacketSendEvt,

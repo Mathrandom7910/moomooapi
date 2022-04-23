@@ -1,3 +1,6 @@
+/**
+ * Player interface containing info sent on every game tick
+ */
 
 export interface IPlayerDat {
     x: number;
@@ -15,6 +18,10 @@ export interface IPlayerDat {
     zIndex: number;
 }
 
+/**
+ * Player class containing information on a specific player
+ */
+
 export class Player implements IPlayerDat{
     x: number = -2;
     y: number = -2;
@@ -30,6 +37,8 @@ export class Player implements IPlayerDat{
     acc: number = -2;
     isSkull: boolean = false;
     zIndex: number = -1;
+    health: number = 100;
+
 
     assign(dat: IPlayerDat) {
         this.x = dat.x;
