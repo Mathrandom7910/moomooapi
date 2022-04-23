@@ -43,7 +43,7 @@ export interface PlayerEvents {
 }
 
 export class EventEmitter<Map> {
-    events: Eventable[] = [];
+    private events: Eventable[] = [];
 
     on<K extends keyof Map>(type: K, cb: (event: Map[K]) => any) {
         this.events.push(new Eventable(type, cb));

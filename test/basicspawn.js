@@ -1,5 +1,3 @@
-import { MooMooAPI } from "../src/main"
-
 const api = new MooMooAPI();
 
 api.on("packetReceive", (e) => {
