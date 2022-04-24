@@ -1,5 +1,5 @@
 
-import { EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents } from "./evt";
+import { EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents } from "./events";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player } from "./player";
 import * as msgpack from "./msgpack"
