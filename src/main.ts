@@ -122,7 +122,6 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
         case S2CPacketType.removePlayer:
           const player = this.getPlayerById(payload[0]);
-          console.log(player, payload, this.players, payload[0]);
           if(player) {
             this.emit("playerLeave", new PlayerEvent(player));
             delete this.players[player.sid];
@@ -151,13 +150,26 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   /**
    * Returns a player from their id (string)
-   * @param id id of the player to search for
-   * @returns the player if found, otherwise null
+   * @param id The id of the player to search for
+   * @returns The player if found, otherwise null
    */
 
   getPlayerById(id: string) {
     for(let i of this.players) {
       if(i?.id == id) return i;
+    }
+    return null;
+  }
+
+  /**
+   * Returns a player from their sid (number)
+   * @param sid The sid of the player to search for
+   * @returns The player if found, otherwise null
+   */
+
+  getPlayerBySid(sid: number) {
+    for(let i of this.players) {
+      if(i?.sid == sid) return i;
     }
     return null;
   }
