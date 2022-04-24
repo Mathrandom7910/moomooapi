@@ -9,7 +9,7 @@ class Evt {
     this.eventName = eventName;
   }
 }
-class PacketEvt extends Evt {
+class PacketEvent extends Evt {
   constructor(packet) {
     super("packet");
     __publicField(this, "payload");
@@ -17,19 +17,25 @@ class PacketEvt extends Evt {
     this.payload = packet[1];
   }
 }
-class PacketReceiveEvt extends PacketEvt {
+class PacketReceiveEvent extends PacketEvent {
   constructor(pack) {
     super(pack);
     __publicField(this, "type");
     this.type = pack[0];
   }
 }
-class PacketSendEvt extends PacketEvt {
+class PacketSendEvent extends PacketEvent {
   constructor(pack) {
     super(pack);
     __publicField(this, "type");
     __publicField(this, "isCanceled", false);
     this.type = pack[0];
+  }
+}
+class PlayerEvent extends Evt {
+  constructor(player) {
+    super("player");
+    this.player = player;
   }
 }
 class HealthEvent extends Evt {
@@ -56,15 +62,15 @@ class EventEmitter {
   once(type, cb) {
     this.events.push(new Eventable(type, cb, false));
   }
-  emit(type, ...args) {
+  emit(type, arg) {
     this.events.filter((evt) => {
       if (evt.name != type)
         return true;
-      evt.cb(...args);
+      evt.cb(arg);
       return !evt.once;
     });
   }
-  rmv(type) {
+  removeEvent(type) {
     this.events.forEach((e) => {
       if (e.name == type) {
         e.once = true;
@@ -149,6 +155,7 @@ class Player {
     __publicField(this, "isSkull", false);
     __publicField(this, "zIndex", -1);
     __publicField(this, "health", 100);
+    __publicField(this, "name", "NULL");
   }
   assign(dat) {
     this.x = dat.x;
@@ -658,7 +665,7 @@ class MooMooAPI extends EventEmitter {
       constructor(url) {
         super(url);
         this.send = (m) => {
-          const PackEv = new PacketSendEvt(msgpack2.decode(new Uint8Array(m)));
+          const PackEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(m)));
           if (that.onPacketSend(PackEv))
             return;
           that.emit("packetSend", PackEv);
@@ -675,8 +682,7 @@ class MooMooAPI extends EventEmitter {
   initSocket() {
     var _a;
     (_a = this.socket) == null ? void 0 : _a.addEventListener("message", (m) => {
-      var _a2;
-      const packEvt = new PacketReceiveEvt(msgpack2.decode(new Uint8Array(m.data)));
+      const packEvt = new PacketReceiveEvent(msgpack2.decode(new Uint8Array(m.data)));
       this.emit("packetReceive", packEvt);
       this.onPacketReceive(packEvt);
       const payload = packEvt.payload;
@@ -684,11 +690,8 @@ class MooMooAPI extends EventEmitter {
       switch (type) {
         case S2CPacketType.health:
           const sid = payload[0];
-          const health = payload[1];
-          this.emit("health", new HealthEvent(sid, health));
-          const player = this.players[sid];
-          if (player)
-            player.health = health;
+          this.emit("health", new HealthEvent(sid, payload[1]));
+          this.players[sid].health = payload[1];
           break;
         case S2CPacketType.init:
           this.player.id = payload[0];
@@ -715,13 +718,43 @@ class MooMooAPI extends EventEmitter {
               isSkull: plinf[11],
               zIndex: plinf[12]
             };
-            if (!this.players[thisPlayer.sid])
+            if (!this.players[thisPlayer.sid]) {
+              console.warn("Ran into unpredicted circumstance current player cannot be found, IPlayerDat, this.players, IPlayerDat.sid", thisPlayer, this.players, thisPlayer.sid);
               this.players[thisPlayer.sid] = new Player();
-            (_a2 = this.players[thisPlayer.sid]) == null ? void 0 : _a2.assign(thisPlayer);
+            }
+            this.emit("updatePlayer", thisPlayer);
+            this.players[thisPlayer.sid].assign(thisPlayer);
           }
+          break;
+        case S2CPacketType.removePlayer:
+          const player = this.getPlayerById(payload[0]);
+          console.log(player, payload, this.players, payload[0]);
+          if (player) {
+            this.emit("playerLeave", new PlayerEvent(player));
+            delete this.players[player.sid];
+          }
+          break;
+        case S2CPacketType.addPlayer:
+          const dataPayload = payload[0];
+          const aSid = dataPayload[1];
+          const aPlayer = new Player();
+          aPlayer.sid = aSid;
+          aPlayer.id = dataPayload[0];
+          aPlayer.name = dataPayload[2];
+          aPlayer.x = dataPayload[3];
+          aPlayer.y = dataPayload[4];
+          this.players[aSid] = aPlayer;
+          this.emit("addPlayer", new PlayerEvent(aPlayer));
           break;
       }
     });
+  }
+  getPlayerById(id) {
+    for (let i of this.players) {
+      if ((i == null ? void 0 : i.id) == id)
+        return i;
+    }
+    return null;
   }
   onPacketSend(evt) {
     return false;

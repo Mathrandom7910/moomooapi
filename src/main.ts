@@ -1,5 +1,5 @@
 
-import { EventEmitter, HealthEvent, PacketReceiveEvt, PacketSendEvt, PlayerEvents } from "./evt";
+import { EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents } from "./evt";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player } from "./player";
 import * as msgpack from "./msgpack"
@@ -37,7 +37,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * Array of players that have been onscreen
    */
 
-  players: Player[] | undefined[] = [];
+  players: Player[] = [];
 
   constructor() {
     super();
@@ -54,7 +54,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
     
         this.send = (m) => {
-          const PackEv = new PacketSendEvt(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
+          const PackEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
           if(that.onPacketSend(PackEv)) return;
           that.emit("packetSend", PackEv);
           this.hiddenSend(m);
@@ -71,19 +71,16 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   private initSocket() {
     this.socket?.addEventListener("message", (m) => {
-      const packEvt = new PacketReceiveEvt(msgpack2.decode(new Uint8Array(m.data)));
+      const packEvt = new PacketReceiveEvent(msgpack2.decode(new Uint8Array(m.data)));
       this.emit("packetReceive", packEvt);
       this.onPacketReceive(packEvt);
       const payload = packEvt.payload;
       const type = packEvt.type;
-
       switch(type) {
         case S2CPacketType.health:
           const sid = payload[0];
-          const health = payload[1];
-          this.emit("health", new HealthEvent(sid, health));
-          const player = this.players[sid]
-          if(player) player.health = health;
+          this.emit("health", new HealthEvent(sid, payload[1]));
+          this.players[sid].health = payload[1];
         break;
 
         case S2CPacketType.init:
@@ -113,13 +110,56 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
                 isSkull: plinf[11],
                 zIndex: plinf[12]
             }
-            if(!this.players[thisPlayer.sid]) this.players[thisPlayer.sid] = new Player();
-            this.players[thisPlayer.sid]?.assign(thisPlayer);
-
+            if(!this.players[thisPlayer.sid]){
+              console.warn("Ran into unpredicted circumstance current player cannot be found, IPlayerDat, this.players, IPlayerDat.sid", thisPlayer, this.players, thisPlayer.sid);
+              this.players[thisPlayer.sid] = new Player();
+            }
+          this.emit("updatePlayer", thisPlayer);
+          this.players[thisPlayer.sid].assign(thisPlayer);
           }
+        break;
+
+
+        case S2CPacketType.removePlayer:
+          const player = this.getPlayerById(payload[0]);
+          console.log(player, payload, this.players, payload[0]);
+          if(player) {
+            this.emit("playerLeave", new PlayerEvent(player));
+            delete this.players[player.sid];
+          }
+        break;
+
+        case S2CPacketType.addPlayer:
+          //   0            1   2      3      4     5  6    7   8   9
+          //['zTKfDDx58e', 1, 'name', 8491, 10519, 0, 100, 100, 35, 0]
+          const dataPayload = payload[0];
+          const aSid = dataPayload[1];
+          const aPlayer = new Player();
+          aPlayer.sid = aSid;
+          
+          aPlayer.id = dataPayload[0];
+          aPlayer.name = dataPayload[2];
+          aPlayer.x = dataPayload[3];
+          aPlayer.y = dataPayload[4];
+
+          this.players[aSid] = aPlayer;
+          this.emit("addPlayer", new PlayerEvent(aPlayer));
         break;
       }
     });
+  }
+
+  /**
+   * Returns a player from their id (string)
+   * @param id id of the player to search for
+   * @returns the player if found, otherwise null
+   */
+
+  getPlayerById(id: string) {
+    for(let i of this.players) {
+      if(i?.id == id) return i;
+    }
+    return null;
   }
 
   /**
@@ -128,7 +168,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * @returns boolean value if should cancel the event (true if it should cancel, and false otherwise)
    */
 
-  onPacketSend(evt: PacketSendEvt): boolean {
+  onPacketSend(evt: PacketSendEvent): boolean {
     evt;
     return false;
   }
@@ -138,7 +178,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * @param evt The packet event containing information
    */
 
-  onPacketReceive(evt: PacketReceiveEvt) {
+  onPacketReceive(evt: PacketReceiveEvent) {
     evt;
   }
 

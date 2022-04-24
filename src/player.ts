@@ -38,6 +38,7 @@ export class Player implements IPlayerDat{
     isSkull: boolean = false;
     zIndex: number = -1;
     health: number = 100;
+    name = "NULL";
 
 
     assign(dat: IPlayerDat) {

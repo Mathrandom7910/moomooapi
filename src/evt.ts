@@ -1,4 +1,5 @@
 import { C2SPacketType, RawC2SPacket, RawPacket, RawS2CPacket, S2CPacketType } from "./packets";
+import { IPlayerDat, Player } from "./player";
 
 class Evt {
     constructor(public eventName: string) {
@@ -10,7 +11,7 @@ interface Cancelable {
 }
 
 
-abstract class PacketEvt extends Evt{
+abstract class PacketEvent extends Evt{
     abstract type: C2SPacketType | S2CPacketType;
     payload: any[];
     constructor(public packet: RawPacket) {
@@ -23,7 +24,7 @@ abstract class PacketEvt extends Evt{
  * Event for receiving packets
  */
 
-export class PacketReceiveEvt extends PacketEvt {
+export class PacketReceiveEvent extends PacketEvent {
     type: S2CPacketType;
     constructor(pack: RawS2CPacket) {
         super(pack);
@@ -35,12 +36,22 @@ export class PacketReceiveEvt extends PacketEvt {
  * Event for sending packets
  */
 
-export class PacketSendEvt extends PacketEvt implements Cancelable {
+export class PacketSendEvent extends PacketEvent implements Cancelable {
     type: C2SPacketType;
     isCanceled = false;
     constructor(pack: RawC2SPacket) {
         super(pack);
         this.type = pack[0];
+    }
+}
+
+/**
+ * Base for the player events
+ */
+
+export class PlayerEvent extends Evt {
+    constructor(public player: Player) {
+        super("player");
     }
 }
 
@@ -51,6 +62,16 @@ export class PacketSendEvt extends PacketEvt implements Cancelable {
 export class HealthEvent extends Evt {
     constructor(public sid: number, public health: number) {
         super("health");
+    }
+}
+
+/**
+ * Update player event, called every 110 ms to update the players within range
+ */
+
+export class UpdatePlayersEvent extends Evt {
+    constructor() {
+        super("updateplayer");
     }
 }
 
@@ -65,9 +86,12 @@ class Eventable {
  */
 
 export interface PlayerEvents {
-    packetSend: PacketSendEvt,
-    packetReceive: PacketReceiveEvt,
-    health: HealthEvent
+    packetSend: PacketSendEvent,
+    packetReceive: PacketReceiveEvent,
+    health: HealthEvent,
+    playerLeave: PlayerEvent,
+    updatePlayer: IPlayerDat,
+    addPlayer: PlayerEvent
 }
 
 export class EventEmitter<Map> {
@@ -77,23 +101,23 @@ export class EventEmitter<Map> {
         this.events.push(new Eventable(type, cb));
     }
 
-    once<K extends keyof Map>(type: K, cb: Function) {
+    once<K extends keyof Map>(type: K, cb: (event: Map[K]) => any) {
         this.events.push(new Eventable(type, cb, false));
     }
 
-    emit<K extends keyof Map>(type: K, ...args: any[]) {
+    emit<K extends keyof Map>(type: K, arg: Map[K]) {
         this.events.filter(evt => {
             if(evt.name != type) return true;
-            evt.cb(...args);
+            evt.cb(arg);
             return !evt.once;
         });
     }
 
-    rmv<K extends keyof Map>(type: K) {
+    removeEvent<K extends keyof Map>(type: K) {
         this.events.forEach(e => {
             if(e.name == type){
                 e.once = true;
             }
-        })
+        });
     }
 }
