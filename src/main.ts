@@ -54,9 +54,11 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
     
         this.send = (m) => {
-          const PackEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
-          if(that.onPacketSend(PackEv)) return;
-          that.emit("packetSend", PackEv);
+          const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
+          that.onPacketSend(packEv);
+          that.emit("packetSend", packEv)
+          if(packEv.isCanceled) return;
+        //  that.emit("packetSend", PackEv);
           this.hiddenSend(m);
         }
         that.socket = this;
