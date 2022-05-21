@@ -4,15 +4,15 @@
  */
 
 export enum SkinColours {
-    brown,
-    beige,
-    darkBrown,
-    peach,
-    white,
-    red,
-    black,
-    pink,
-    blue,
-    green,
-    secretLightBlue = "length"
+    BROWN,
+    BEIGE,
+    DARKBROWN,
+    PEACH,
+    WHITE,
+    RED,
+    BLACK,
+    PINK,
+    BLUE,
+    GREEN,
+    SECRETLIGHTBLUE = "length"
 }
