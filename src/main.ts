@@ -1,9 +1,10 @@
 
-import { EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents } from "./events";
+import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent } from "./events";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player } from "./player";
 import * as msgpack from "./msgpack"
 import { SkinColours } from "./misc";
+import { ObjectRemoveReason, IObject } from "./gameobject";
 
 var mLoc = <any> msgpack;
 export const msgpack2 = <typeof msgpack> mLoc.msgpack;
@@ -20,6 +21,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   static SkinColours = SkinColours;
   static C2SPacketType = C2SPacketType;
   static S2CPacketType = S2CPacketType;
+  static ObjectRemoveReason = ObjectRemoveReason;
 
   /**
    * The raw websocket to interact with the game
@@ -39,6 +41,8 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   players: Player[] = [];
 
+  gameObjects: IObject[] = [];
+
   constructor() {
     super();
 
@@ -50,17 +54,18 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
       }
       constructor(url: string) {
         super(url);
-
+        
 
     
         this.send = (m) => {
           const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
-          that.onPacketSend(packEv);
+          //that.onPacketSend(packEv);
           that.emit("packetSend", packEv)
           if(packEv.isCanceled) return;
         //  that.emit("packetSend", PackEv);
           this.hiddenSend(m);
         }
+
         that.socket = this;
         that.initSocket();
       }
@@ -75,7 +80,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.socket?.addEventListener("message", (m) => {
       const packEvt = new PacketReceiveEvent(msgpack2.decode(new Uint8Array(m.data)));
       this.emit("packetReceive", packEvt);
-      this.onPacketReceive(packEvt);
+      //this.onPacketReceive(packEvt);
       const payload = packEvt.payload;
       const type = packEvt.type;
       switch(type) {
@@ -146,6 +151,40 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           this.players[aSid] = aPlayer;
           this.emit("addPlayer", new PlayerEvent(aPlayer));
         break;
+
+        case S2CPacketType.addObject:
+          for (let i = 0; i < payload[0].length; i += 8) {
+            const binf = payload[0].slice(i, i + 8);
+            const thisBuild: IObject = {
+                id: binf[0],
+                x: binf[1],
+                y: binf[2],
+                dir: binf[3],
+                scale: binf[4],
+                type: binf[5],
+                buildType: binf[6],
+                ownerSid: binf[7]
+            }
+            this.gameObjects[thisBuild.id] = thisBuild;
+            this.emit("addObject", new ObjectAddEvent(thisBuild));
+          }
+        break;
+
+        case S2CPacketType.removeObject:
+          this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[payload[0]], ObjectRemoveReason.BUILDINGBREAK));
+          delete this.gameObjects[payload[0]];
+        break;
+
+        case S2CPacketType.removeAllObjects:
+          for(let i = 0; i < this.gameObjects.length; i++) {
+            const ind = this.gameObjects[i];
+            if(!ind) continue;
+            if(ind.ownerSid == payload[0]) {
+              this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[i], ObjectRemoveReason.PLAYERLEAVE));
+              this.gameObjects.slice(i, 1);
+            }
+          }
+        break;
       }
     });
   }
@@ -174,26 +213,6 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
       if(i?.sid == sid) return i;
     }
     return null;
-  }
-
-  /**
-   * Called before a packet is sent to the server
-   * @param evt The packet event containing information
-   * @returns boolean value if should cancel the event (true if it should cancel, and false otherwise)
-   */
-
-  onPacketSend(evt: PacketSendEvent): boolean {
-    evt;
-    return false;
-  }
-
-  /**
-   * Called once the client received a packet from the server
-   * @param evt The packet event containing information
-   */
-
-  onPacketReceive(evt: PacketReceiveEvent) {
-    evt;
   }
 
   /**
@@ -233,7 +252,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * @param moreRes Whether or not to spawn with more resources
    */
 
-  spawn(name = "moomooapi", skin = SkinColours.red, moreRes = true) {
+  spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
     this.sendBasic(C2SPacketType.spawn, {name: name, skin: skin, moofoll: moreRes});
   }
 }

@@ -1,3 +1,4 @@
+import { ObjectRemoveReason, IObject } from "./gameobject";
 import { C2SPacketType, RawC2SPacket, RawPacket, RawS2CPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player } from "./player";
 
@@ -75,6 +76,26 @@ export class UpdatePlayersEvent extends Evt {
     }
 }
 
+
+class BuildingEvent extends Evt {
+    constructor(public building: IObject) {
+        super("build");
+    }
+}
+
+
+export class ObjectAddEvent extends BuildingEvent {
+    constructor(building: IObject) {
+        super(building);
+    }
+}
+
+export class ObjectRemoveEvent extends BuildingEvent {
+    constructor(building: IObject, public reason: ObjectRemoveReason) {
+        super(building);
+    }
+}
+
 class Eventable {
     constructor(public name: string | number | symbol, public cb: Function, public once = false) {
         
@@ -91,7 +112,9 @@ export interface PlayerEvents {
     health: HealthEvent,
     playerLeave: PlayerEvent,
     updatePlayer: IPlayerDat,
-    addPlayer: PlayerEvent
+    addPlayer: PlayerEvent,
+    addObject: ObjectAddEvent,
+    removeObject: ObjectRemoveEvent
 }
 
 export class EventEmitter<Map> {

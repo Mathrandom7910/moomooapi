@@ -31,7 +31,7 @@ export enum S2CPacketType {
     announce = "ann",
     init = "io-init",
     initTribe = "id",
-    setSid = "1", //sent short after each spawn
+    setSid = "1",
     kick = "d",
     addPlayer = "2",
     updatePlayers = "33",
@@ -46,8 +46,14 @@ export enum S2CPacketType {
     updateMats = "9",
     health = "h",
     death = "11",
-    removeBuild = "12",
-    removeObject = "13",
+    /**
+     * Removes only one building by it's id.
+     */
+    removeObject = "12",
+    /**
+     * Removes all buildings by player sid.
+     */
+    removeAllObjects = "13",
     setItemCount = "14",
     setAge = "15",
     listUpgrades = "16",

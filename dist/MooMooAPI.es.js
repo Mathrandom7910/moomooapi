@@ -45,6 +45,23 @@ class HealthEvent extends Evt {
     this.health = health;
   }
 }
+class BuildingEvent extends Evt {
+  constructor(building) {
+    super("build");
+    this.building = building;
+  }
+}
+class ObjectAddEvent extends BuildingEvent {
+  constructor(building) {
+    super(building);
+  }
+}
+class ObjectRemoveEvent extends BuildingEvent {
+  constructor(building, reason) {
+    super(building);
+    this.reason = reason;
+  }
+}
 class Eventable {
   constructor(name, cb, once = false) {
     this.name = name;
@@ -116,8 +133,8 @@ var S2CPacketType = /* @__PURE__ */ ((S2CPacketType2) => {
   S2CPacketType2["updateMats"] = "9";
   S2CPacketType2["health"] = "h";
   S2CPacketType2["death"] = "11";
-  S2CPacketType2["removeBuild"] = "12";
-  S2CPacketType2["removeObject"] = "13";
+  S2CPacketType2["removeObject"] = "12";
+  S2CPacketType2["removeAllObjects"] = "13";
   S2CPacketType2["setItemCount"] = "14";
   S2CPacketType2["setAge"] = "15";
   S2CPacketType2["listUpgrades"] = "16";
@@ -636,19 +653,24 @@ var msgpack$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePrope
   msgpack
 }, Symbol.toStringTag, { value: "Module" }));
 var SkinColours = /* @__PURE__ */ ((SkinColours2) => {
-  SkinColours2[SkinColours2["brown"] = 0] = "brown";
-  SkinColours2[SkinColours2["beige"] = 1] = "beige";
-  SkinColours2[SkinColours2["darkBrown"] = 2] = "darkBrown";
-  SkinColours2[SkinColours2["peach"] = 3] = "peach";
-  SkinColours2[SkinColours2["white"] = 4] = "white";
-  SkinColours2[SkinColours2["red"] = 5] = "red";
-  SkinColours2[SkinColours2["black"] = 6] = "black";
-  SkinColours2[SkinColours2["pink"] = 7] = "pink";
-  SkinColours2[SkinColours2["blue"] = 8] = "blue";
-  SkinColours2[SkinColours2["green"] = 9] = "green";
-  SkinColours2["secretLightBlue"] = "length";
+  SkinColours2[SkinColours2["BROWN"] = 0] = "BROWN";
+  SkinColours2[SkinColours2["BEIGE"] = 1] = "BEIGE";
+  SkinColours2[SkinColours2["DARKBROWN"] = 2] = "DARKBROWN";
+  SkinColours2[SkinColours2["PEACH"] = 3] = "PEACH";
+  SkinColours2[SkinColours2["WHITE"] = 4] = "WHITE";
+  SkinColours2[SkinColours2["RED"] = 5] = "RED";
+  SkinColours2[SkinColours2["BLACK"] = 6] = "BLACK";
+  SkinColours2[SkinColours2["PINK"] = 7] = "PINK";
+  SkinColours2[SkinColours2["BLUE"] = 8] = "BLUE";
+  SkinColours2[SkinColours2["GREEN"] = 9] = "GREEN";
+  SkinColours2["SECRETLIGHTBLUE"] = "length";
   return SkinColours2;
 })(SkinColours || {});
+var ObjectRemoveReason = /* @__PURE__ */ ((ObjectRemoveReason2) => {
+  ObjectRemoveReason2[ObjectRemoveReason2["PLAYERLEAVE"] = 0] = "PLAYERLEAVE";
+  ObjectRemoveReason2[ObjectRemoveReason2["BUILDINGBREAK"] = 1] = "BUILDINGBREAK";
+  return ObjectRemoveReason2;
+})(ObjectRemoveReason || {});
 var mLoc = msgpack$1;
 const msgpack2 = mLoc.msgpack;
 class MooMooAPI extends EventEmitter {
@@ -657,6 +679,7 @@ class MooMooAPI extends EventEmitter {
     __publicField(this, "socket", null);
     __publicField(this, "player", new Player());
     __publicField(this, "players", []);
+    __publicField(this, "gameObjects", []);
     var that = this;
     class WS extends WebSocket {
       hiddenSend(data) {
@@ -665,10 +688,10 @@ class MooMooAPI extends EventEmitter {
       constructor(url) {
         super(url);
         this.send = (m) => {
-          const PackEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(m)));
-          if (that.onPacketSend(PackEv))
+          const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(m)));
+          that.emit("packetSend", packEv);
+          if (packEv.isCanceled)
             return;
-          that.emit("packetSend", PackEv);
           this.hiddenSend(m);
         };
         that.socket = this;
@@ -684,7 +707,6 @@ class MooMooAPI extends EventEmitter {
     (_a = this.socket) == null ? void 0 : _a.addEventListener("message", (m) => {
       const packEvt = new PacketReceiveEvent(msgpack2.decode(new Uint8Array(m.data)));
       this.emit("packetReceive", packEvt);
-      this.onPacketReceive(packEvt);
       const payload = packEvt.payload;
       const type = packEvt.type;
       switch (type) {
@@ -728,7 +750,6 @@ class MooMooAPI extends EventEmitter {
           break;
         case S2CPacketType.removePlayer:
           const player = this.getPlayerById(payload[0]);
-          console.log(player, payload, this.players, payload[0]);
           if (player) {
             this.emit("playerLeave", new PlayerEvent(player));
             delete this.players[player.sid];
@@ -746,6 +767,38 @@ class MooMooAPI extends EventEmitter {
           this.players[aSid] = aPlayer;
           this.emit("addPlayer", new PlayerEvent(aPlayer));
           break;
+        case S2CPacketType.addObject:
+          for (let i = 0; i < payload[0].length; i += 8) {
+            const binf = payload[0].slice(i, i + 8);
+            const thisBuild = {
+              id: binf[0],
+              x: binf[1],
+              y: binf[2],
+              dir: binf[3],
+              scale: binf[4],
+              type: binf[5],
+              buildType: binf[6],
+              ownerSid: binf[7]
+            };
+            this.gameObjects[thisBuild.id] = thisBuild;
+            this.emit("addObject", new ObjectAddEvent(thisBuild));
+          }
+          break;
+        case S2CPacketType.removeObject:
+          this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[payload[0]], ObjectRemoveReason.BUILDINGBREAK));
+          delete this.gameObjects[payload[0]];
+          break;
+        case S2CPacketType.removeAllObjects:
+          for (let i = 0; i < this.gameObjects.length; i++) {
+            const ind = this.gameObjects[i];
+            if (!ind)
+              continue;
+            if (ind.ownerSid == payload[0]) {
+              this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[i], ObjectRemoveReason.PLAYERLEAVE));
+              this.gameObjects.slice(i, 1);
+            }
+          }
+          break;
       }
     });
   }
@@ -756,10 +809,12 @@ class MooMooAPI extends EventEmitter {
     }
     return null;
   }
-  onPacketSend(evt) {
-    return false;
-  }
-  onPacketReceive(evt) {
+  getPlayerBySid(sid) {
+    for (let i of this.players) {
+      if ((i == null ? void 0 : i.sid) == sid)
+        return i;
+    }
+    return null;
   }
   sendRaw(packet) {
     var _a;
@@ -772,13 +827,14 @@ class MooMooAPI extends EventEmitter {
     var sock = this.socket;
     sock == null ? void 0 : sock.hiddenSend(msgpack2.encode([t, payload]));
   }
-  spawn(name = "moomooapi", skin = SkinColours.red, moreRes = true) {
+  spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
     this.sendBasic(C2SPacketType.spawn, { name, skin, moofoll: moreRes });
   }
 }
 __publicField(MooMooAPI, "SkinColours", SkinColours);
 __publicField(MooMooAPI, "C2SPacketType", C2SPacketType);
 __publicField(MooMooAPI, "S2CPacketType", S2CPacketType);
+__publicField(MooMooAPI, "ObjectRemoveReason", ObjectRemoveReason);
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI
 });
