@@ -125,7 +125,7 @@ export class EventEmitter<Map> {
     }
 
     once<K extends keyof Map>(type: K, cb: (event: Map[K]) => any) {
-        this.events.push(new Eventable(type, cb, false));
+        this.events.push(new Eventable(type, cb, true));
     }
 
     emit<K extends keyof Map>(type: K, arg: Map[K]) {

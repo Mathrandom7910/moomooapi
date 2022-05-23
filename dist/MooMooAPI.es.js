@@ -77,7 +77,7 @@ class EventEmitter {
     this.events.push(new Eventable(type, cb));
   }
   once(type, cb) {
-    this.events.push(new Eventable(type, cb, false));
+    this.events.push(new Eventable(type, cb, true));
   }
   emit(type, arg) {
     this.events.filter((evt) => {
@@ -155,6 +155,51 @@ var S2CPacketType = /* @__PURE__ */ ((S2CPacketType2) => {
   S2CPacketType2["pingMap"] = "p";
   return S2CPacketType2;
 })(S2CPacketType || {});
+var ItemIds = /* @__PURE__ */ ((ItemIds2) => {
+  ItemIds2[ItemIds2["APPLE"] = 0] = "APPLE";
+  ItemIds2[ItemIds2["COOKIE"] = 1] = "COOKIE";
+  ItemIds2[ItemIds2["CHEESE"] = 2] = "CHEESE";
+  ItemIds2[ItemIds2["WOOD_WALL"] = 3] = "WOOD_WALL";
+  ItemIds2[ItemIds2["STONE_WALL"] = 4] = "STONE_WALL";
+  ItemIds2[ItemIds2["CASTLE_WALL"] = 5] = "CASTLE_WALL";
+  ItemIds2[ItemIds2["SPIKE"] = 6] = "SPIKE";
+  ItemIds2[ItemIds2["GREATER_SPIKE"] = 7] = "GREATER_SPIKE";
+  ItemIds2[ItemIds2["POISON_SPIKE"] = 8] = "POISON_SPIKE";
+  ItemIds2[ItemIds2["SPINNING_SPIKE"] = 9] = "SPINNING_SPIKE";
+  ItemIds2[ItemIds2["WINDMILL"] = 10] = "WINDMILL";
+  ItemIds2[ItemIds2["FASTER_WINDMILL"] = 11] = "FASTER_WINDMILL";
+  ItemIds2[ItemIds2["POWER_MILL"] = 12] = "POWER_MILL";
+  ItemIds2[ItemIds2["MINE"] = 13] = "MINE";
+  ItemIds2[ItemIds2["SAPPLING"] = 14] = "SAPPLING";
+  ItemIds2[ItemIds2["PIT_TRAP"] = 15] = "PIT_TRAP";
+  ItemIds2[ItemIds2["BOOST_PAD"] = 16] = "BOOST_PAD";
+  ItemIds2[ItemIds2["TURRET"] = 17] = "TURRET";
+  ItemIds2[ItemIds2["PLATFORM"] = 18] = "PLATFORM";
+  ItemIds2[ItemIds2["HEALING_PAD"] = 19] = "HEALING_PAD";
+  ItemIds2[ItemIds2["SPAWN_PAD"] = 20] = "SPAWN_PAD";
+  ItemIds2[ItemIds2["BLOCKER"] = 21] = "BLOCKER";
+  ItemIds2[ItemIds2["TELEPORTER"] = 22] = "TELEPORTER";
+  return ItemIds2;
+})(ItemIds || {});
+var WeaponIds = /* @__PURE__ */ ((WeaponIds2) => {
+  WeaponIds2[WeaponIds2["TOOL_HAMMER"] = 0] = "TOOL_HAMMER";
+  WeaponIds2[WeaponIds2["HAND_AXE"] = 1] = "HAND_AXE";
+  WeaponIds2[WeaponIds2["GREAT_AXE"] = 2] = "GREAT_AXE";
+  WeaponIds2[WeaponIds2["SHORT_SWORD"] = 3] = "SHORT_SWORD";
+  WeaponIds2[WeaponIds2["KATANA"] = 4] = "KATANA";
+  WeaponIds2[WeaponIds2["POLE_ARM"] = 5] = "POLE_ARM";
+  WeaponIds2[WeaponIds2["BAT"] = 6] = "BAT";
+  WeaponIds2[WeaponIds2["DAGGERS"] = 7] = "DAGGERS";
+  WeaponIds2[WeaponIds2["STICK"] = 8] = "STICK";
+  WeaponIds2[WeaponIds2["HUNTING_BOW"] = 9] = "HUNTING_BOW";
+  WeaponIds2[WeaponIds2["GREAT_HAMMER"] = 10] = "GREAT_HAMMER";
+  WeaponIds2[WeaponIds2["WOODEN_SHIELD"] = 11] = "WOODEN_SHIELD";
+  WeaponIds2[WeaponIds2["CROSSBOW"] = 12] = "CROSSBOW";
+  WeaponIds2[WeaponIds2["REPEATER_CROSSBOW"] = 13] = "REPEATER_CROSSBOW";
+  WeaponIds2[WeaponIds2["MC_GRABBY"] = 14] = "MC_GRABBY";
+  WeaponIds2[WeaponIds2["MUSKET"] = 15] = "MUSKET";
+  return WeaponIds2;
+})(WeaponIds || {});
 class Player {
   constructor() {
     __publicField(this, "x", -2);
@@ -175,6 +220,7 @@ class Player {
     __publicField(this, "name", "NULL");
   }
   assign(dat) {
+    console.log(dat);
     this.x = dat.x;
     this.y = dat.y;
     this.sid = dat.sid;
@@ -188,6 +234,50 @@ class Player {
     this.acc = dat.acc;
     this.isSkull = dat.isSkull;
     this.zIndex = dat.zIndex;
+  }
+}
+class SelfPlayer extends Player {
+  constructor() {
+    super(...arguments);
+    __publicField(this, "weapons", [WeaponIds.TOOL_HAMMER, void 0]);
+    __publicField(this, "items", [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, void 0, void 0, void 0, void 0]);
+  }
+  getFoodType() {
+    return this.items[0];
+  }
+  getWallType() {
+    return this.items[1];
+  }
+  getSpikeType() {
+    return this.items[2];
+  }
+  getMillType() {
+    return this.items[3];
+  }
+  searchForId(id) {
+    for (let i of this.items) {
+      if (i == id)
+        return i;
+    }
+    return null;
+  }
+  getSapplingType() {
+    return this.searchForId(ItemIds.SAPPLING);
+  }
+  getMineType() {
+    return this.searchForId(ItemIds.MINE);
+  }
+  getSpecialType() {
+    return this.searchForId(ItemIds.TURRET) || this.searchForId(ItemIds.BLOCKER) || this.searchForId(ItemIds.HEALING_PAD) || this.searchForId(ItemIds.PLATFORM) || this.searchForId(ItemIds.TELEPORTER);
+  }
+  getPadType() {
+    return this.items[4] || null;
+  }
+  getPrimaryType() {
+    return this.items[0];
+  }
+  getSecondaryType() {
+    return this.items[1];
   }
 }
 function serialize(data) {
@@ -677,7 +767,7 @@ class MooMooAPI extends EventEmitter {
   constructor() {
     super();
     __publicField(this, "socket", null);
-    __publicField(this, "player", new Player());
+    __publicField(this, "player", new SelfPlayer());
     __publicField(this, "players", []);
     __publicField(this, "gameObjects", []);
     var that = this;
@@ -758,7 +848,9 @@ class MooMooAPI extends EventEmitter {
         case S2CPacketType.addPlayer:
           const dataPayload = payload[0];
           const aSid = dataPayload[1];
-          const aPlayer = new Player();
+          var aPlayer = this.player;
+          if (aSid != this.player.sid)
+            aPlayer = new Player();
           aPlayer.sid = aSid;
           aPlayer.id = dataPayload[0];
           aPlayer.name = dataPayload[2];
@@ -799,6 +891,19 @@ class MooMooAPI extends EventEmitter {
             }
           }
           break;
+        case S2CPacketType.setItemsBar:
+          if (payload[0]) {
+            if (payload[1]) {
+              this.player.weapons = payload[0];
+            } else {
+              this.player.items = payload[0];
+            }
+          }
+          break;
+        case S2CPacketType.death:
+          this.player.weapons = [WeaponIds.TOOL_HAMMER, void 0];
+          this.player.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, void 0, void 0, void 0, void 0];
+          break;
       }
     });
   }
@@ -830,11 +935,34 @@ class MooMooAPI extends EventEmitter {
   spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
     this.sendBasic(C2SPacketType.spawn, { name, skin, moofoll: moreRes });
   }
+  setHand(id, isWeapon) {
+    this.sendBasic(C2SPacketType.selectItem, id, isWeapon);
+  }
+  setItem(id) {
+    this.setHand(id, false);
+  }
+  setWeapon(id) {
+    this.setHand(id, true);
+  }
+  attack(on, direction = null) {
+    this.sendBasic(C2SPacketType.attack, on, direction);
+  }
+  singleSwing(direction = null) {
+    this.attack(true, direction);
+    this.attack(false);
+  }
+  placeItem(item, direction = null) {
+    this.setItem(item);
+    this.singleSwing(direction);
+    this.setWeapon(this.player.wep);
+  }
 }
 __publicField(MooMooAPI, "SkinColours", SkinColours);
 __publicField(MooMooAPI, "C2SPacketType", C2SPacketType);
 __publicField(MooMooAPI, "S2CPacketType", S2CPacketType);
 __publicField(MooMooAPI, "ObjectRemoveReason", ObjectRemoveReason);
+__publicField(MooMooAPI, "ItemIds", ItemIds);
+__publicField(MooMooAPI, "WeaponIds", WeaponIds);
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI
 });

@@ -1,10 +1,12 @@
 
 import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent } from "./events";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
-import { IPlayerDat, Player } from "./player";
+import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
 import { SkinColours } from "./misc";
 import { ObjectRemoveReason, IObject } from "./gameobject";
+import { ItemIds } from "./data/items";
+import { WeaponIds } from "./data/weapons";
 
 var mLoc = <any> msgpack;
 export const msgpack2 = <typeof msgpack> mLoc.msgpack;
@@ -22,6 +24,8 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   static C2SPacketType = C2SPacketType;
   static S2CPacketType = S2CPacketType;
   static ObjectRemoveReason = ObjectRemoveReason;
+  static ItemIds = ItemIds;
+  static WeaponIds = WeaponIds;
 
   /**
    * The raw websocket to interact with the game
@@ -33,7 +37,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * Current game player
    */
 
-  player = new Player();
+  player = new SelfPlayer();
 
   /**
    * Array of players that have been onscreen
@@ -140,7 +144,8 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           //['zTKfDDx58e', 1, 'name', 8491, 10519, 0, 100, 100, 35, 0]
           const dataPayload = payload[0];
           const aSid = dataPayload[1];
-          const aPlayer = new Player();
+          var aPlayer: Player = this.player
+          if(aSid != this.player.sid) aPlayer = new Player(); 
           aPlayer.sid = aSid;
           
           aPlayer.id = dataPayload[0];
@@ -184,6 +189,21 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
               this.gameObjects.slice(i, 1);
             }
           }
+        break;
+
+        case S2CPacketType.setItemsBar:
+          if(payload[0]) {
+            if(payload[1]) {
+              this.player.weapons = payload[0];
+            } else {
+              this.player.items = payload[0];
+            }
+          }
+        break;
+
+        case S2CPacketType.death:
+          this.player.weapons = [WeaponIds.TOOL_HAMMER, undefined];
+          this.player.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, undefined, undefined, undefined, undefined];
         break;
       }
     });
@@ -254,6 +274,33 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
     this.sendBasic(C2SPacketType.spawn, {name: name, skin: skin, moofoll: moreRes});
+  }
+
+  setHand(id: ItemIds | WeaponIds, isWeapon: boolean) {
+    this.sendBasic(C2SPacketType.selectItem, id, isWeapon);
+  }
+
+  setItem(id: ItemIds) {
+    this.setHand(id, false);
+  }
+
+  setWeapon(id: WeaponIds) {
+    this.setHand(id, true);
+  }
+
+  attack(on: boolean, direction: number | null = null) {
+    this.sendBasic(C2SPacketType.attack, on, direction);
+  }
+
+  singleSwing(direction: number | null = null) {
+    this.attack(true, direction);
+    this.attack(false);
+  }
+
+  placeItem(item: ItemIds, direction: number | null = null) {
+    this.setItem(item);
+    this.singleSwing(direction);
+    this.setWeapon(this.player.wep);
   }
 }
 

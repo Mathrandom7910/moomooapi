@@ -2,6 +2,9 @@
  * Player interface containing info sent on every game tick
  */
 
+import { ItemIds } from "./data/items";
+import { WeaponIds } from "./data/weapons";
+
 export interface IPlayerDat {
     x: number;
     y: number;
@@ -55,5 +58,68 @@ export class Player implements IPlayerDat{
         this.acc = dat.acc;
         this.isSkull = dat.isSkull;
         this.zIndex = dat.zIndex;
+    }
+}
+
+export type numu = number | undefined;
+
+export type WeaponsType = [number, numu];
+export type ItemsType = [number, number, number, number, numu, numu, numu, numu]
+
+export class SelfPlayer extends Player {
+    weapons: WeaponsType = [WeaponIds.TOOL_HAMMER, undefined];
+    //[0, 3, 6, 10];
+    items: ItemsType = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, undefined, undefined, undefined, undefined];
+
+    getFoodType() {
+        return this.items[0];
+    }
+
+    getWallType() {
+        return this.items[1];
+    }
+
+    getSpikeType() {
+        return this.items[2];
+    }
+
+    getMillType() {
+        return this.items[3];
+    }
+
+    searchForId(id: number) {
+        for(let i of this.items) {
+            if(i == id) return i;
+        }
+        return null;
+    }
+
+    getSapplingType() {
+        return this.searchForId(ItemIds.SAPPLING);
+    }
+
+    getMineType() {
+        return this.searchForId(ItemIds.MINE);
+    }
+
+    getSpecialType() {
+        return this.searchForId(ItemIds.TURRET) || this.searchForId(ItemIds.BLOCKER) || this.searchForId(ItemIds.HEALING_PAD) || this.searchForId(ItemIds.PLATFORM) || this.searchForId(ItemIds.TELEPORTER);
+    }
+
+    /**
+     * 
+     * @returns The type of pad selected at age 4 (boost or trap)
+     */
+
+    getPadType() {
+        return this.items[4] || null;
+    }
+
+    getPrimaryType() {
+        return this.items[0];
+    }
+
+    getSecondaryType() {
+        return this.items[1];
     }
 }
