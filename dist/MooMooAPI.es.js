@@ -220,7 +220,6 @@ class Player {
     __publicField(this, "name", "NULL");
   }
   assign(dat) {
-    console.log(dat);
     this.x = dat.x;
     this.y = dat.y;
     this.sid = dat.sid;
