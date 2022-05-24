@@ -1,9 +1,3 @@
-var __defProp = Object.defineProperty;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __publicField = (obj, key, value) => {
-  __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-  return value;
-};
 class Evt {
   constructor(eventName) {
     this.eventName = eventName;
@@ -12,7 +6,6 @@ class Evt {
 class PacketEvent extends Evt {
   constructor(packet) {
     super("packet");
-    __publicField(this, "payload");
     this.packet = packet;
     this.payload = packet[1];
   }
@@ -20,15 +13,13 @@ class PacketEvent extends Evt {
 class PacketReceiveEvent extends PacketEvent {
   constructor(pack) {
     super(pack);
-    __publicField(this, "type");
     this.type = pack[0];
   }
 }
 class PacketSendEvent extends PacketEvent {
   constructor(pack) {
     super(pack);
-    __publicField(this, "type");
-    __publicField(this, "isCanceled", false);
+    this.isCanceled = false;
     this.type = pack[0];
   }
 }
@@ -71,7 +62,7 @@ class Eventable {
 }
 class EventEmitter {
   constructor() {
-    __publicField(this, "events", []);
+    this.events = [];
   }
   on(type, cb) {
     this.events.push(new Eventable(type, cb));
@@ -202,22 +193,22 @@ var WeaponIds = /* @__PURE__ */ ((WeaponIds2) => {
 })(WeaponIds || {});
 class Player {
   constructor() {
-    __publicField(this, "x", -2);
-    __publicField(this, "y", -2);
-    __publicField(this, "sid", -2);
-    __publicField(this, "id", "NULL");
-    __publicField(this, "dir", 0);
-    __publicField(this, "obj", -2);
-    __publicField(this, "wep", -2);
-    __publicField(this, "variant", -2);
-    __publicField(this, "tribe", "NULL");
-    __publicField(this, "isLeader", false);
-    __publicField(this, "hat", -2);
-    __publicField(this, "acc", -2);
-    __publicField(this, "isSkull", false);
-    __publicField(this, "zIndex", -1);
-    __publicField(this, "health", 100);
-    __publicField(this, "name", "NULL");
+    this.x = -2;
+    this.y = -2;
+    this.sid = -2;
+    this.id = "NULL";
+    this.dir = 0;
+    this.obj = -2;
+    this.wep = -2;
+    this.variant = -2;
+    this.tribe = "NULL";
+    this.isLeader = false;
+    this.hat = -2;
+    this.acc = -2;
+    this.isSkull = false;
+    this.zIndex = -1;
+    this.health = 100;
+    this.name = "NULL";
   }
   assign(dat) {
     this.x = dat.x;
@@ -238,8 +229,8 @@ class Player {
 class SelfPlayer extends Player {
   constructor() {
     super(...arguments);
-    __publicField(this, "weapons", [WeaponIds.TOOL_HAMMER, void 0]);
-    __publicField(this, "items", [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, void 0, void 0, void 0, void 0]);
+    this.weapons = [WeaponIds.TOOL_HAMMER, void 0];
+    this.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, void 0, void 0, void 0, void 0];
   }
   getFoodType() {
     return this.items[0];
@@ -755,6 +746,25 @@ var SkinColours = /* @__PURE__ */ ((SkinColours2) => {
   SkinColours2["SECRETLIGHTBLUE"] = "length";
   return SkinColours2;
 })(SkinColours || {});
+class Repeater {
+  constructor(cb, int, keyCode) {
+    this.cb = cb;
+    this.int = int;
+    this.keyCode = keyCode;
+    this.intervalId = -1;
+  }
+  start(keyCode) {
+    if (this.keyCode != keyCode)
+      return;
+    this.intervalId = setInterval(this.cb, this.int);
+  }
+  stop(keyCode) {
+    if (this.keyCode != keyCode)
+      return;
+    clearInterval(this.intervalId);
+    this.intervalId = -1;
+  }
+}
 var ObjectRemoveReason = /* @__PURE__ */ ((ObjectRemoveReason2) => {
   ObjectRemoveReason2[ObjectRemoveReason2["PLAYERLEAVE"] = 0] = "PLAYERLEAVE";
   ObjectRemoveReason2[ObjectRemoveReason2["BUILDINGBREAK"] = 1] = "BUILDINGBREAK";
@@ -765,10 +775,10 @@ const msgpack2 = mLoc.msgpack;
 class MooMooAPI extends EventEmitter {
   constructor() {
     super();
-    __publicField(this, "socket", null);
-    __publicField(this, "player", new SelfPlayer());
-    __publicField(this, "players", []);
-    __publicField(this, "gameObjects", []);
+    this.socket = null;
+    this.player = new SelfPlayer();
+    this.players = [];
+    this.gameObjects = [];
     var that = this;
     class WS extends WebSocket {
       hiddenSend(data) {
@@ -956,12 +966,13 @@ class MooMooAPI extends EventEmitter {
     this.setWeapon(this.player.wep);
   }
 }
-__publicField(MooMooAPI, "SkinColours", SkinColours);
-__publicField(MooMooAPI, "C2SPacketType", C2SPacketType);
-__publicField(MooMooAPI, "S2CPacketType", S2CPacketType);
-__publicField(MooMooAPI, "ObjectRemoveReason", ObjectRemoveReason);
-__publicField(MooMooAPI, "ItemIds", ItemIds);
-__publicField(MooMooAPI, "WeaponIds", WeaponIds);
+MooMooAPI.SkinColours = SkinColours;
+MooMooAPI.C2SPacketType = C2SPacketType;
+MooMooAPI.S2CPacketType = S2CPacketType;
+MooMooAPI.ObjectRemoveReason = ObjectRemoveReason;
+MooMooAPI.ItemIds = ItemIds;
+MooMooAPI.WeaponIds = WeaponIds;
+MooMooAPI.Repeater = Repeater;
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI
 });

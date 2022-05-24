@@ -3,7 +3,7 @@ import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketRece
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
-import { SkinColours } from "./misc";
+import { Repeater, SkinColours } from "./misc";
 import { ObjectRemoveReason, IObject } from "./gameobject";
 import { ItemIds } from "./data/items";
 import { WeaponIds } from "./data/weapons";
@@ -26,6 +26,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   static ObjectRemoveReason = ObjectRemoveReason;
   static ItemIds = ItemIds;
   static WeaponIds = WeaponIds;
+  static Repeater = Repeater;
 
   /**
    * The raw websocket to interact with the game
