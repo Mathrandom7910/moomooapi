@@ -53,6 +53,13 @@ class ObjectRemoveEvent extends BuildingEvent {
     this.reason = reason;
   }
 }
+class ChatEvent extends Evt {
+  constructor(sid, message) {
+    super("chat");
+    this.sid = sid;
+    this.message = message;
+  }
+}
 class Eventable {
   constructor(name, cb, once = false) {
     this.name = name;
@@ -87,63 +94,63 @@ class EventEmitter {
   }
 }
 var C2SPacketType = /* @__PURE__ */ ((C2SPacketType2) => {
-  C2SPacketType2["spawn"] = "sp";
-  C2SPacketType2["chat"] = "ch";
-  C2SPacketType2["attack"] = "c";
-  C2SPacketType2["ping"] = "pp";
-  C2SPacketType2["setAngle"] = "2";
-  C2SPacketType2["selectItem"] = "5";
-  C2SPacketType2["upgrade"] = "6";
-  C2SPacketType2["autoAttack"] = "7";
-  C2SPacketType2["createTribe"] = "8";
-  C2SPacketType2["leaveTribe"] = "9";
-  C2SPacketType2["requestJoinTribe"] = "10";
-  C2SPacketType2["acceptTribeRequest"] = "11";
-  C2SPacketType2["kickFromTribe"] = "12";
-  C2SPacketType2["buyFromShop"] = "13c";
-  C2SPacketType2["pingMap"] = "14";
-  C2SPacketType2["move"] = "33";
+  C2SPacketType2["SPAWN"] = "sp";
+  C2SPacketType2["CHAT"] = "ch";
+  C2SPacketType2["ATTACK"] = "c";
+  C2SPacketType2["PING"] = "pp";
+  C2SPacketType2["SET_ANGLE"] = "2";
+  C2SPacketType2["SELECT_ITEM"] = "5";
+  C2SPacketType2["UPGRADE"] = "6";
+  C2SPacketType2["AUTO_ATTACK"] = "7";
+  C2SPacketType2["CREATE_TRIBE"] = "8";
+  C2SPacketType2["LEAVE_TRIBE"] = "9";
+  C2SPacketType2["REQUEST_JOIN_TRIBE"] = "10";
+  C2SPacketType2["ACCEPT_TRIBE_REQUEST"] = "11";
+  C2SPacketType2["KICK_FROM_TRIBE"] = "12";
+  C2SPacketType2["BUY_FROM_SHOP"] = "13c";
+  C2SPacketType2["PING_MAP"] = "14";
+  C2SPacketType2["MOVE"] = "33";
   return C2SPacketType2;
 })(C2SPacketType || {});
 var S2CPacketType = /* @__PURE__ */ ((S2CPacketType2) => {
-  S2CPacketType2["announce"] = "ann";
-  S2CPacketType2["init"] = "io-init";
-  S2CPacketType2["initTribe"] = "id";
-  S2CPacketType2["setSid"] = "1";
-  S2CPacketType2["kick"] = "d";
-  S2CPacketType2["addPlayer"] = "2";
-  S2CPacketType2["updatePlayers"] = "33";
-  S2CPacketType2["removePlayer"] = "4";
-  S2CPacketType2["updateLeaderBoard"] = "5";
-  S2CPacketType2["addObject"] = "6";
-  S2CPacketType2["updateAi"] = "a";
-  S2CPacketType2["playerSwing"] = "7";
-  S2CPacketType2["moostafaSwing"] = "aa";
-  S2CPacketType2["wiggle"] = "8";
-  S2CPacketType2["shootTurret"] = "sp";
-  S2CPacketType2["updateMats"] = "9";
-  S2CPacketType2["health"] = "h";
-  S2CPacketType2["death"] = "11";
-  S2CPacketType2["removeObject"] = "12";
-  S2CPacketType2["removeAllObjects"] = "13";
-  S2CPacketType2["setItemCount"] = "14";
-  S2CPacketType2["setAge"] = "15";
-  S2CPacketType2["listUpgrades"] = "16";
-  S2CPacketType2["setItemsBar"] = "17";
-  S2CPacketType2["addProjectile"] = "18";
-  S2CPacketType2["removeProjectile"] = "19";
-  S2CPacketType2["serverRestart"] = "20";
-  S2CPacketType2["addTribe"] = "ac";
-  S2CPacketType2["deleteTribe"] = "ad";
-  S2CPacketType2["requestJoin"] = "an";
-  S2CPacketType2["setTribe"] = "st";
-  S2CPacketType2["setTribeMembers"] = "sa";
-  S2CPacketType2["minimapLocation"] = "mm";
-  S2CPacketType2["chat"] = "ch";
-  S2CPacketType2["updateShop"] = "us";
-  S2CPacketType2["ping"] = "pp";
-  S2CPacketType2["dmgTest"] = "t";
-  S2CPacketType2["pingMap"] = "p";
+  S2CPacketType2["ANNOUNCE"] = "ann";
+  S2CPacketType2["INIT"] = "io-init";
+  S2CPacketType2["INIT_TRIBES"] = "id";
+  S2CPacketType2["SET_SID"] = "1";
+  S2CPacketType2["KICK"] = "d";
+  S2CPacketType2["ADD_PLAYER"] = "2";
+  S2CPacketType2["UPDAE_PLAYERS"] = "33";
+  S2CPacketType2["REMOVE_PLAYER"] = "4";
+  S2CPacketType2["UPDATE_LEADER_BOARD"] = "5";
+  S2CPacketType2["ADD_OBJECT"] = "6";
+  S2CPacketType2["UPDATE_AIS"] = "a";
+  S2CPacketType2["PLAYER_SWING"] = "7";
+  S2CPacketType2["MOOSTAFA_SWING"] = "aa";
+  S2CPacketType2["WIGGLE"] = "8";
+  S2CPacketType2["SHOOT_TURRET"] = "sp";
+  S2CPacketType2["UPDATE_MATS"] = "9";
+  S2CPacketType2["HEALTH"] = "h";
+  S2CPacketType2["DEATH"] = "11";
+  S2CPacketType2["REMOVE_OBJECT"] = "12";
+  S2CPacketType2["REMOVE_ALL_OBJECTS"] = "13";
+  S2CPacketType2["SET_ITEM_COUNT"] = "14";
+  S2CPacketType2["SET_AGE"] = "15";
+  S2CPacketType2["LIST_UPGRADES"] = "16";
+  S2CPacketType2["SET_ITEMS_BAR"] = "17";
+  S2CPacketType2["ADD_PROJECTILE"] = "18";
+  S2CPacketType2["REMOVE_PROJECTILE"] = "19";
+  S2CPacketType2["SERVER_RESTART"] = "20";
+  S2CPacketType2["ADD_TRIBE"] = "ac";
+  S2CPacketType2["DELETE_TRIBE"] = "ad";
+  S2CPacketType2["REQUEST_JOIN_TRIBE"] = "an";
+  S2CPacketType2["SET_TRIBE"] = "st";
+  S2CPacketType2["SET_TRIBE_MEMBERS"] = "sa";
+  S2CPacketType2["MINIMAP_LOCATIONS"] = "mm";
+  S2CPacketType2["CHAT"] = "ch";
+  S2CPacketType2["UPDATE_SHOP"] = "us";
+  S2CPacketType2["PING"] = "pp";
+  S2CPacketType2["DAMAGE_TEST"] = "t";
+  S2CPacketType2["PING_MAP"] = "p";
   return S2CPacketType2;
 })(S2CPacketType || {});
 var ItemIds = /* @__PURE__ */ ((ItemIds2) => {
@@ -809,19 +816,19 @@ class MooMooAPI extends EventEmitter {
       const payload = packEvt.payload;
       const type = packEvt.type;
       switch (type) {
-        case S2CPacketType.health:
+        case S2CPacketType.HEALTH:
           const sid = payload[0];
           this.emit("health", new HealthEvent(sid, payload[1]));
           this.players[sid].health = payload[1];
           break;
-        case S2CPacketType.init:
+        case S2CPacketType.INIT:
           this.player.id = payload[0];
           break;
-        case S2CPacketType.setSid:
+        case S2CPacketType.SET_SID:
           this.players[payload[0]] = this.player;
           this.player.sid = payload[0];
           break;
-        case S2CPacketType.updatePlayers:
+        case S2CPacketType.UPDAE_PLAYERS:
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
             const thisPlayer = {
@@ -847,14 +854,14 @@ class MooMooAPI extends EventEmitter {
             this.players[thisPlayer.sid].assign(thisPlayer);
           }
           break;
-        case S2CPacketType.removePlayer:
+        case S2CPacketType.REMOVE_PLAYER:
           const player = this.getPlayerById(payload[0]);
           if (player) {
             this.emit("playerLeave", new PlayerEvent(player));
             delete this.players[player.sid];
           }
           break;
-        case S2CPacketType.addPlayer:
+        case S2CPacketType.ADD_PLAYER:
           const dataPayload = payload[0];
           const aSid = dataPayload[1];
           var aPlayer = this.player;
@@ -868,7 +875,7 @@ class MooMooAPI extends EventEmitter {
           this.players[aSid] = aPlayer;
           this.emit("addPlayer", new PlayerEvent(aPlayer));
           break;
-        case S2CPacketType.addObject:
+        case S2CPacketType.ADD_OBJECT:
           for (let i = 0; i < payload[0].length; i += 8) {
             const binf = payload[0].slice(i, i + 8);
             const thisBuild = {
@@ -885,11 +892,11 @@ class MooMooAPI extends EventEmitter {
             this.emit("addObject", new ObjectAddEvent(thisBuild));
           }
           break;
-        case S2CPacketType.removeObject:
+        case S2CPacketType.REMOVE_OBJECT:
           this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[payload[0]], ObjectRemoveReason.BUILDINGBREAK));
           delete this.gameObjects[payload[0]];
           break;
-        case S2CPacketType.removeAllObjects:
+        case S2CPacketType.REMOVE_ALL_OBJECTS:
           for (let i = 0; i < this.gameObjects.length; i++) {
             const ind = this.gameObjects[i];
             if (!ind)
@@ -900,7 +907,7 @@ class MooMooAPI extends EventEmitter {
             }
           }
           break;
-        case S2CPacketType.setItemsBar:
+        case S2CPacketType.SET_ITEMS_BAR:
           if (payload[0]) {
             if (payload[1]) {
               this.player.weapons = payload[0];
@@ -909,9 +916,12 @@ class MooMooAPI extends EventEmitter {
             }
           }
           break;
-        case S2CPacketType.death:
+        case S2CPacketType.DEATH:
           this.player.weapons = [WeaponIds.TOOL_HAMMER, void 0];
           this.player.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, void 0, void 0, void 0, void 0];
+          break;
+        case S2CPacketType.CHAT:
+          this.emit("chat", new ChatEvent(payload[0], payload[1]));
           break;
       }
     });
@@ -942,10 +952,10 @@ class MooMooAPI extends EventEmitter {
     sock == null ? void 0 : sock.hiddenSend(msgpack2.encode([t, payload]));
   }
   spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
-    this.sendBasic(C2SPacketType.spawn, { name, skin, moofoll: moreRes });
+    this.sendBasic(C2SPacketType.SPAWN, { name, skin, moofoll: moreRes });
   }
   setHand(id, isWeapon) {
-    this.sendBasic(C2SPacketType.selectItem, id, isWeapon);
+    this.sendBasic(C2SPacketType.SELECT_ITEM, id, isWeapon);
   }
   setItem(id) {
     this.setHand(id, false);
@@ -954,7 +964,7 @@ class MooMooAPI extends EventEmitter {
     this.setHand(id, true);
   }
   attack(on, direction = null) {
-    this.sendBasic(C2SPacketType.attack, on, direction);
+    this.sendBasic(C2SPacketType.ATTACK, on, direction);
   }
   singleSwing(direction = null) {
     this.attack(true, direction);

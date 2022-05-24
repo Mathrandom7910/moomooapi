@@ -1,5 +1,5 @@
 
-import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent } from "./events";
+import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent } from "./events";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
@@ -89,22 +89,22 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
       const payload = packEvt.payload;
       const type = packEvt.type;
       switch(type) {
-        case S2CPacketType.health:
+        case S2CPacketType.HEALTH:
           const sid = payload[0];
           this.emit("health", new HealthEvent(sid, payload[1]));
           this.players[sid].health = payload[1];
         break;
 
-        case S2CPacketType.init:
+        case S2CPacketType.INIT:
           this.player.id = payload[0];
         break;
 
-        case S2CPacketType.setSid:
+        case S2CPacketType.SET_SID:
           this.players[payload[0]] = this.player;
           this.player.sid = payload[0];
         break;
 
-        case S2CPacketType.updatePlayers:
+        case S2CPacketType.UPDAE_PLAYERS:
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
             const thisPlayer: IPlayerDat = {
@@ -132,7 +132,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         break;
 
 
-        case S2CPacketType.removePlayer:
+        case S2CPacketType.REMOVE_PLAYER:
           const player = this.getPlayerById(payload[0]);
           if(player) {
             this.emit("playerLeave", new PlayerEvent(player));
@@ -140,7 +140,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           }
         break;
 
-        case S2CPacketType.addPlayer:
+        case S2CPacketType.ADD_PLAYER:
           //   0            1   2      3      4     5  6    7   8   9
           //['zTKfDDx58e', 1, 'name', 8491, 10519, 0, 100, 100, 35, 0]
           const dataPayload = payload[0];
@@ -158,7 +158,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           this.emit("addPlayer", new PlayerEvent(aPlayer));
         break;
 
-        case S2CPacketType.addObject:
+        case S2CPacketType.ADD_OBJECT:
           for (let i = 0; i < payload[0].length; i += 8) {
             const binf = payload[0].slice(i, i + 8);
             const thisBuild: IObject = {
@@ -176,12 +176,12 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           }
         break;
 
-        case S2CPacketType.removeObject:
+        case S2CPacketType.REMOVE_OBJECT:
           this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[payload[0]], ObjectRemoveReason.BUILDINGBREAK));
           delete this.gameObjects[payload[0]];
         break;
 
-        case S2CPacketType.removeAllObjects:
+        case S2CPacketType.REMOVE_ALL_OBJECTS:
           for(let i = 0; i < this.gameObjects.length; i++) {
             const ind = this.gameObjects[i];
             if(!ind) continue;
@@ -192,7 +192,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           }
         break;
 
-        case S2CPacketType.setItemsBar:
+        case S2CPacketType.SET_ITEMS_BAR:
           if(payload[0]) {
             if(payload[1]) {
               this.player.weapons = payload[0];
@@ -202,9 +202,13 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           }
         break;
 
-        case S2CPacketType.death:
+        case S2CPacketType.DEATH:
           this.player.weapons = [WeaponIds.TOOL_HAMMER, undefined];
           this.player.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, undefined, undefined, undefined, undefined];
+        break;
+
+        case S2CPacketType.CHAT:
+          this.emit("chat", new ChatEvent(payload[0], payload[1]));
         break;
       }
     });
@@ -274,11 +278,11 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    */
 
   spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
-    this.sendBasic(C2SPacketType.spawn, {name: name, skin: skin, moofoll: moreRes});
+    this.sendBasic(C2SPacketType.SPAWN, {name: name, skin: skin, moofoll: moreRes});
   }
 
   setHand(id: ItemIds | WeaponIds, isWeapon: boolean) {
-    this.sendBasic(C2SPacketType.selectItem, id, isWeapon);
+    this.sendBasic(C2SPacketType.SELECT_ITEM, id, isWeapon);
   }
 
   setItem(id: ItemIds) {
@@ -290,7 +294,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   }
 
   attack(on: boolean, direction: number | null = null) {
-    this.sendBasic(C2SPacketType.attack, on, direction);
+    this.sendBasic(C2SPacketType.ATTACK, on, direction);
   }
 
   singleSwing(direction: number | null = null) {

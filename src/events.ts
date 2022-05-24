@@ -96,6 +96,12 @@ export class ObjectRemoveEvent extends BuildingEvent {
     }
 }
 
+export class ChatEvent extends Evt {
+    constructor(public sid: number, public message: string) {
+        super("chat");
+    }
+}
+
 class Eventable {
     constructor(public name: string | number | symbol, public cb: Function, public once = false) {
         
@@ -114,7 +120,8 @@ export interface PlayerEvents {
     updatePlayer: IPlayerDat,
     addPlayer: PlayerEvent,
     addObject: ObjectAddEvent,
-    removeObject: ObjectRemoveEvent
+    removeObject: ObjectRemoveEvent,
+    chat: ChatEvent
 }
 
 export class EventEmitter<Map> {
