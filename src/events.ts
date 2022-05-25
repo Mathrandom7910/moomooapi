@@ -76,13 +76,15 @@ export class UpdatePlayersEvent extends Evt {
     }
 }
 
-
 class BuildingEvent extends Evt {
     constructor(public building: IObject) {
         super("build");
     }
 }
 
+/**
+ * Object add event called when building is placed.
+ */
 
 export class ObjectAddEvent extends BuildingEvent {
     constructor(building: IObject) {
@@ -90,11 +92,19 @@ export class ObjectAddEvent extends BuildingEvent {
     }
 }
 
+/**
+ * Object remove event called when a building should be removed by the game
+ */
+
 export class ObjectRemoveEvent extends BuildingEvent {
     constructor(building: IObject, public reason: ObjectRemoveReason) {
         super(building);
     }
 }
+
+/**
+ * Chat event called when a player sends a chat message
+ */
 
 export class ChatEvent extends Evt {
     constructor(public sid: number, public message: string) {

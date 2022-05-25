@@ -4,6 +4,7 @@
 
 import { ItemIds } from "./data/items";
 import { WeaponIds } from "./data/weapons";
+import { numu } from "./misc";
 
 export interface IPlayerDat {
     x: number;
@@ -42,6 +43,8 @@ export class Player implements IPlayerDat{
     zIndex: number = -1;
     health: number = 100;
     name = "NULL";
+    chatMessage: string | null = null;
+    messageTimeout = -1;
 
 
     assign(dat: IPlayerDat) {
@@ -61,7 +64,7 @@ export class Player implements IPlayerDat{
     }
 }
 
-export type numu = number | undefined;
+
 
 export type WeaponsType = [number, numu];
 export type ItemsType = [number, number, number, number, numu, numu, numu, numu]

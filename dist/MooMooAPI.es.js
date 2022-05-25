@@ -216,6 +216,8 @@ class Player {
     this.zIndex = -1;
     this.health = 100;
     this.name = "NULL";
+    this.chatMessage = null;
+    this.messageTimeout = -1;
   }
   assign(dat) {
     this.x = dat.x;
@@ -786,6 +788,7 @@ class MooMooAPI extends EventEmitter {
     this.player = new SelfPlayer();
     this.players = [];
     this.gameObjects = [];
+    this.alive = false;
     var that = this;
     class WS extends WebSocket {
       hiddenSend(data) {
@@ -798,6 +801,8 @@ class MooMooAPI extends EventEmitter {
           that.emit("packetSend", packEv);
           if (packEv.isCanceled)
             return;
+          if (packEv.type == C2SPacketType.SPAWN)
+            that.alive = true;
           this.hiddenSend(m);
         };
         that.socket = this;
@@ -921,7 +926,18 @@ class MooMooAPI extends EventEmitter {
           this.player.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, void 0, void 0, void 0, void 0];
           break;
         case S2CPacketType.CHAT:
-          this.emit("chat", new ChatEvent(payload[0], payload[1]));
+          const sidMsg = payload[0];
+          const playerMsg = this.getPlayerBySid(sidMsg);
+          if (playerMsg == null) {
+            return;
+          }
+          const msg = payload[1];
+          clearTimeout(playerMsg.messageTimeout);
+          playerMsg.chatMessage = msg;
+          playerMsg.messageTimeout = setTimeout(() => {
+            playerMsg.chatMessage = null;
+          }, 3e3);
+          this.emit("chat", new ChatEvent(sidMsg, msg));
           break;
       }
     });
@@ -983,6 +999,7 @@ MooMooAPI.ObjectRemoveReason = ObjectRemoveReason;
 MooMooAPI.ItemIds = ItemIds;
 MooMooAPI.WeaponIds = WeaponIds;
 MooMooAPI.Repeater = Repeater;
+MooMooAPI.msgpack = msgpack2;
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI
 });

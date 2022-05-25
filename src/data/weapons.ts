@@ -1,3 +1,7 @@
+/**
+ * Weapon interface declaring what every weapon should contain
+ */
+
 export interface Weapon {
   id: number,
   type: number,
@@ -31,6 +35,10 @@ export interface Weapon {
   hideProjectile?: boolean
 }
 
+/**
+ * Each weapon id contained in an enum
+ */
+
 export enum WeaponIds {
   TOOL_HAMMER,
   HAND_AXE,
@@ -49,6 +57,10 @@ export enum WeaponIds {
   MC_GRABBY,
   MUSKET
 }
+
+/**
+ * List of weapons in game
+ */
 
 export const weaponList: Weapon[] = [{
   id: 0,

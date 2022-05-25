@@ -1,4 +1,4 @@
-# MooMoo api
+# MOOMOOAPI
 
 An api written for the browser game moomoo.io
 
@@ -6,7 +6,10 @@ Examples can be viewed at the <a href="https://github.com/Mathrandom7910/moomooa
 
 Documentation was created using typedoc, you can view it <a href="https://mathrandom7910.github.io/moomooapi/">here.</a>
 
-Why vite? Why not?
+# TODO:
+    Add documentation for each packet.
+    Make packet listener use objects instead of switch for better performance.
+    Create bot api???
 
 Credit where it's due,
 <a href="https://github.com/Picoseconds/sanctuary">Sanctuary</a> for some item ids,

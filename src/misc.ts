@@ -34,3 +34,6 @@ export class Repeater {
         this.intervalId = -1;
     }
 }
+
+export type numu = number | undefined;
+export type numull = number | null;

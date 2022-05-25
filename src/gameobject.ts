@@ -9,6 +9,10 @@ export interface IObject {
     ownerSid: number
 }
 
+/**
+ * Reason an object was removed from the game
+ */
+
 export enum ObjectRemoveReason {
     PLAYERLEAVE,
     BUILDINGBREAK

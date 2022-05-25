@@ -27,6 +27,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   static ItemIds = ItemIds;
   static WeaponIds = WeaponIds;
   static Repeater = Repeater;
+  static msgpack = msgpack2;
 
   /**
    * The raw websocket to interact with the game
@@ -46,7 +47,17 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   players: Player[] = [];
 
+  /**
+   * Array of game objects that are sent to the client and still exist
+   */
+
   gameObjects: IObject[] = [];
+
+  /**
+   * Boolean value if the player is alive or not
+   */
+
+  alive = false;
 
   constructor() {
     super();
@@ -64,10 +75,9 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     
         this.send = (m) => {
           const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
-          //that.onPacketSend(packEv);
-          that.emit("packetSend", packEv)
+          that.emit("packetSend", packEv);
           if(packEv.isCanceled) return;
-        //  that.emit("packetSend", PackEv);
+          if(packEv.type == C2SPacketType.SPAWN) that.alive = true;
           this.hiddenSend(m);
         }
 
@@ -145,7 +155,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           //['zTKfDDx58e', 1, 'name', 8491, 10519, 0, 100, 100, 35, 0]
           const dataPayload = payload[0];
           const aSid = dataPayload[1];
-          var aPlayer: Player = this.player
+          var aPlayer: Player = this.player;
           if(aSid != this.player.sid) aPlayer = new Player(); 
           aPlayer.sid = aSid;
           
@@ -208,7 +218,18 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         break;
 
         case S2CPacketType.CHAT:
-          this.emit("chat", new ChatEvent(payload[0], payload[1]));
+          const sidMsg = payload[0] as number;
+          const playerMsg = this.getPlayerBySid(sidMsg);
+          if(playerMsg == null) {
+            return;
+          }
+          const msg = payload[1] as string;
+          clearTimeout(playerMsg.messageTimeout);
+          playerMsg.chatMessage = msg;
+          playerMsg.messageTimeout = setTimeout(() => {
+            playerMsg.chatMessage = null;
+          }, 3000) as unknown as number;
+          this.emit("chat", new ChatEvent(sidMsg, msg));
         break;
       }
     });
@@ -280,6 +301,12 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
     this.sendBasic(C2SPacketType.SPAWN, {name: name, skin: skin, moofoll: moreRes});
   }
+
+  /**
+   * Helper method to set hand to an item or weapon
+   * @param id Id of item or weapon to set to
+   * @param isWeapon 
+   */
 
   setHand(id: ItemIds | WeaponIds, isWeapon: boolean) {
     this.sendBasic(C2SPacketType.SELECT_ITEM, id, isWeapon);
