@@ -59,36 +59,55 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   alive = false;
 
-  constructor() {
+  constructor(dynws = true) {
     super();
 
-    var that = this;
+    const that = this;
 
-    class WS extends WebSocket {
-      hiddenSend(data: ArrayBufferLike | string | Blob | ArrayBufferView) {
-        super.send(data)
-      }
-      constructor(url: string) {
-        super(url);
-        
+    if(dynws) {
+      Object.defineProperty(WebSocket.prototype, "hiddenSend", {
+        value: WebSocket.prototype.send
+      });
 
-    
-        this.send = (m) => {
-          const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
+      Object.defineProperty(WebSocket.prototype, "send", {
+        value: function(m: ArrayBuffer) {
+          if(that.socket == null) that.socket = this;
+          const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(m)));
           that.emit("packetSend", packEv);
           if(packEv.isCanceled) return;
           if(packEv.type == C2SPacketType.SPAWN) that.alive = true;
-          this.hiddenSend(m);
+          const t = this as WST;
+          t.hiddenSend(m);
         }
+      })
+    } else {
 
-        that.socket = this;
-        that.initSocket();
+      class WS extends WebSocket implements WST{
+        hiddenSend(data: ArrayBufferLike | string | Blob | ArrayBufferView) {
+          super.send(data)
+        }
+        constructor(url: string) {
+          super(url);
+          
+
+      
+          this.send = (m) => {
+            const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
+            that.emit("packetSend", packEv);
+            if(packEv.isCanceled) return;
+            if(packEv.type == C2SPacketType.SPAWN) that.alive = true;
+            this.hiddenSend(m);
+          }
+
+          that.socket = this;
+          that.initSocket();
+        }
       }
-    }
 
-    Object.defineProperty(window, "WebSocket", {
-      value: WS
-    });
+      Object.defineProperty(window, "WebSocket", {
+        value: WS
+      });
+    }
   }
 
   private initSocket() {
@@ -335,7 +354,6 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.setWeapon(this.player.wep);
   }
 }
-
 
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI

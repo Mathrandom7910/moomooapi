@@ -782,36 +782,56 @@ var ObjectRemoveReason = /* @__PURE__ */ ((ObjectRemoveReason2) => {
 var mLoc = msgpack$1;
 const msgpack2 = mLoc.msgpack;
 class MooMooAPI extends EventEmitter {
-  constructor() {
+  constructor(dynws = true) {
     super();
     this.socket = null;
     this.player = new SelfPlayer();
     this.players = [];
     this.gameObjects = [];
     this.alive = false;
-    var that = this;
-    class WS extends WebSocket {
-      hiddenSend(data) {
-        super.send(data);
-      }
-      constructor(url) {
-        super(url);
-        this.send = (m) => {
+    const that = this;
+    if (dynws) {
+      Object.defineProperty(WebSocket.prototype, "hiddenSend", {
+        value: WebSocket.prototype.send
+      });
+      Object.defineProperty(WebSocket.prototype, "send", {
+        value: function(m) {
+          if (that.socket == null)
+            that.socket = this;
           const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(m)));
           that.emit("packetSend", packEv);
           if (packEv.isCanceled)
             return;
           if (packEv.type == C2SPacketType.SPAWN)
             that.alive = true;
-          this.hiddenSend(m);
-        };
-        that.socket = this;
-        that.initSocket();
+          const t = this;
+          t.hiddenSend(m);
+        }
+      });
+    } else {
+      class WS extends WebSocket {
+        hiddenSend(data) {
+          super.send(data);
+        }
+        constructor(url) {
+          super(url);
+          this.send = (m) => {
+            const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(m)));
+            that.emit("packetSend", packEv);
+            if (packEv.isCanceled)
+              return;
+            if (packEv.type == C2SPacketType.SPAWN)
+              that.alive = true;
+            this.hiddenSend(m);
+          };
+          that.socket = this;
+          that.initSocket();
+        }
       }
+      Object.defineProperty(window, "WebSocket", {
+        value: WS
+      });
     }
-    Object.defineProperty(window, "WebSocket", {
-      value: WS
-    });
   }
   initSocket() {
     var _a;
