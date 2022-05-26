@@ -7,6 +7,7 @@ import { Repeater, SkinColours } from "./misc";
 import { ObjectRemoveReason, IObject } from "./gameobject";
 import { ItemIds } from "./data/items";
 import { WeaponIds } from "./data/weapons";
+import { HatIds } from "./data/hats";
 
 var mLoc = <any> msgpack;
 export const msgpack2 = <typeof msgpack> mLoc.msgpack;
@@ -28,6 +29,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   static WeaponIds = WeaponIds;
   static Repeater = Repeater;
   static msgpack = msgpack2;
+  static HatIds = HatIds;
 
   /**
    * The raw websocket to interact with the game
@@ -379,6 +381,32 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.setItem(item);
     this.singleSwing(direction);
     this.setWeapon(this.player.wep);
+  }
+
+  toggleAutoFire() {
+    this.sendBasic(C2SPacketType.AUTO_ATTACK, 1);
+  }
+
+  setGear(buy: boolean, id: HatIds, isAccessory: boolean) {
+    //            buy id  acc
+    //send("13c", 0, id, 1);
+    this.sendBasic(C2SPacketType.BUY_AND_EQUIP, buy, id, isAccessory);
+  }
+
+  buyGear(id: HatIds, isAccessory: boolean) {
+    this.setGear(true, id, isAccessory);
+  }
+
+  buyHat(id: HatIds) {
+    this.buyGear(id, false);
+  }
+
+  equipGear(id: HatIds, isAccessory: boolean) {
+    this.setGear(false, id, isAccessory);
+  }
+
+  equipHat(id: HatIds) {
+    this.equipGear(id, false);
   }
 }
 

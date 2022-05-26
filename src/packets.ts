@@ -18,7 +18,7 @@ export enum C2SPacketType {
     REQUEST_JOIN_TRIBE = "10",
     ACCEPT_TRIBE_REQUEST = "11",
     KICK_FROM_TRIBE = "12",
-    BUY_FROM_SHOP = "13c",
+    BUY_AND_EQUIP = "13c",
     PING_MAP = "14",
     MOVE = "33"
 }

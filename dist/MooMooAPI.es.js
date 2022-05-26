@@ -107,7 +107,7 @@ var C2SPacketType = /* @__PURE__ */ ((C2SPacketType2) => {
   C2SPacketType2["REQUEST_JOIN_TRIBE"] = "10";
   C2SPacketType2["ACCEPT_TRIBE_REQUEST"] = "11";
   C2SPacketType2["KICK_FROM_TRIBE"] = "12";
-  C2SPacketType2["BUY_FROM_SHOP"] = "13c";
+  C2SPacketType2["BUY_AND_EQUIP"] = "13c";
   C2SPacketType2["PING_MAP"] = "14";
   C2SPacketType2["MOVE"] = "33";
   return C2SPacketType2;
@@ -779,10 +779,59 @@ var ObjectRemoveReason = /* @__PURE__ */ ((ObjectRemoveReason2) => {
   ObjectRemoveReason2[ObjectRemoveReason2["BUILDINGBREAK"] = 1] = "BUILDINGBREAK";
   return ObjectRemoveReason2;
 })(ObjectRemoveReason || {});
+var HatIds = /* @__PURE__ */ ((HatIds2) => {
+  HatIds2[HatIds2["SHAME"] = 45] = "SHAME";
+  HatIds2[HatIds2["MOO_CAP"] = 51] = "MOO_CAP";
+  HatIds2[HatIds2["APPLE_CAP"] = 50] = "APPLE_CAP";
+  HatIds2[HatIds2["MOO_HEAD"] = 28] = "MOO_HEAD";
+  HatIds2[HatIds2["PIG_HEAD"] = 29] = "PIG_HEAD";
+  HatIds2[HatIds2["FLUFF_HEAD"] = 30] = "FLUFF_HEAD";
+  HatIds2[HatIds2["PANDOU_HEAD"] = 36] = "PANDOU_HEAD";
+  HatIds2[HatIds2["BEAR_HEAD"] = 37] = "BEAR_HEAD";
+  HatIds2[HatIds2["MONKEY_HEAD"] = 38] = "MONKEY_HEAD";
+  HatIds2[HatIds2["POLAR_HEAD"] = 44] = "POLAR_HEAD";
+  HatIds2[HatIds2["FEZ_HAT"] = 35] = "FEZ_HAT";
+  HatIds2[HatIds2["ENIGMA_HAT"] = 42] = "ENIGMA_HAT";
+  HatIds2[HatIds2["BLITZ_HAT"] = 43] = "BLITZ_HAT";
+  HatIds2[HatIds2["BOB_XIII_HAT"] = 49] = "BOB_XIII_HAT";
+  HatIds2[HatIds2["PUMPKIN"] = 57] = "PUMPKIN";
+  HatIds2[HatIds2["BUMMLE_HAT"] = 8] = "BUMMLE_HAT";
+  HatIds2[HatIds2["STRAW_HAT"] = 2] = "STRAW_HAT";
+  HatIds2[HatIds2["WINTER_CAP"] = 15] = "WINTER_CAP";
+  HatIds2[HatIds2["COWBOY_HAT"] = 5] = "COWBOY_HAT";
+  HatIds2[HatIds2["RANGER_HAT"] = 4] = "RANGER_HAT";
+  HatIds2[HatIds2["EXPLORER_HAT"] = 18] = "EXPLORER_HAT";
+  HatIds2[HatIds2["FLIPPER_HAT"] = 31] = "FLIPPER_HAT";
+  HatIds2[HatIds2["MARKSMAN_CAP"] = 1] = "MARKSMAN_CAP";
+  HatIds2[HatIds2["BUSH_GEAR"] = 10] = "BUSH_GEAR";
+  HatIds2[HatIds2["HALO"] = 48] = "HALO";
+  HatIds2[HatIds2["SOLDIER_HELMET"] = 6] = "SOLDIER_HELMET";
+  HatIds2[HatIds2["ANTI_VENOM_GEAR"] = 23] = "ANTI_VENOM_GEAR";
+  HatIds2[HatIds2["MEDIC_GEAR"] = 13] = "MEDIC_GEAR";
+  HatIds2[HatIds2["MINERS_HELMET"] = 9] = "MINERS_HELMET";
+  HatIds2[HatIds2["MUSKETEER_HAT"] = 32] = "MUSKETEER_HAT";
+  HatIds2[HatIds2["BULL_HELMET"] = 7] = "BULL_HELMET";
+  HatIds2[HatIds2["EMP_HELMET"] = 22] = "EMP_HELMET";
+  HatIds2[HatIds2["BOOSTER_HAT"] = 12] = "BOOSTER_HAT";
+  HatIds2[HatIds2["BARBARIAN_ARMOR"] = 26] = "BARBARIAN_ARMOR";
+  HatIds2[HatIds2["PLAGUE_MASK"] = 21] = "PLAGUE_MASK";
+  HatIds2[HatIds2["BULL_MASK"] = 46] = "BULL_MASK";
+  HatIds2[HatIds2["WINDMILL_HAT"] = 14] = "WINDMILL_HAT";
+  HatIds2[HatIds2["SPIKE_GEAR"] = 11] = "SPIKE_GEAR";
+  HatIds2[HatIds2["TURRET_GEAR"] = 53] = "TURRET_GEAR";
+  HatIds2[HatIds2["SAMURAI_ARMOR"] = 20] = "SAMURAI_ARMOR";
+  HatIds2[HatIds2["DARK_KNIGHT"] = 58] = "DARK_KNIGHT";
+  HatIds2[HatIds2["SCAVENGER_GEAR"] = 27] = "SCAVENGER_GEAR";
+  HatIds2[HatIds2["TANK_GEAR"] = 40] = "TANK_GEAR";
+  HatIds2[HatIds2["THIEF_GEAR"] = 40] = "THIEF_GEAR";
+  HatIds2[HatIds2["BLOODTHIRSTER"] = 55] = "BLOODTHIRSTER";
+  HatIds2[HatIds2["Assassin_GEAR"] = 56] = "Assassin_GEAR";
+  return HatIds2;
+})(HatIds || {});
 var mLoc = msgpack$1;
 const msgpack2 = mLoc.msgpack;
 class MooMooAPI extends EventEmitter {
-  constructor(dynws = true) {
+  constructor(dynws = false) {
     super();
     this.socket = null;
     this.player = new SelfPlayer();
@@ -987,8 +1036,8 @@ class MooMooAPI extends EventEmitter {
     var sock = this.socket;
     sock == null ? void 0 : sock.hiddenSend(msgpack2.encode([t, payload]));
   }
-  spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
-    this.sendBasic(C2SPacketType.SPAWN, { name, skin, moofoll: moreRes });
+  spawn(sname = "moomooapi", sskin = SkinColours.RED, moreRes = true) {
+    this.sendBasic(C2SPacketType.SPAWN, { name: sname, skin: sskin, moofoll: moreRes });
   }
   setHand(id, isWeapon) {
     this.sendBasic(C2SPacketType.SELECT_ITEM, id, isWeapon);
@@ -1011,6 +1060,24 @@ class MooMooAPI extends EventEmitter {
     this.singleSwing(direction);
     this.setWeapon(this.player.wep);
   }
+  toggleAutoFire() {
+    this.sendBasic(C2SPacketType.AUTO_ATTACK, 1);
+  }
+  setGear(buy, id, isAccessory) {
+    this.sendBasic(C2SPacketType.BUY_AND_EQUIP, buy, id, isAccessory);
+  }
+  buyGear(id, isAccessory) {
+    this.setGear(true, id, isAccessory);
+  }
+  buyHat(id) {
+    this.buyGear(id, false);
+  }
+  equipGear(id, isAccessory) {
+    this.setGear(false, id, isAccessory);
+  }
+  equipHat(id) {
+    this.equipGear(id, false);
+  }
 }
 MooMooAPI.SkinColours = SkinColours;
 MooMooAPI.C2SPacketType = C2SPacketType;
@@ -1020,6 +1087,7 @@ MooMooAPI.ItemIds = ItemIds;
 MooMooAPI.WeaponIds = WeaponIds;
 MooMooAPI.Repeater = Repeater;
 MooMooAPI.msgpack = msgpack2;
+MooMooAPI.HatIds = HatIds;
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI
 });
