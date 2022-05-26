@@ -59,7 +59,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   alive = false;
 
-  constructor(dynws = true) {
+  constructor(dynws = false) {
     super();
 
     const that = this;
@@ -317,36 +317,63 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * @param moreRes Whether or not to spawn with more resources
    */
 
-  spawn(name = "moomooapi", skin = SkinColours.RED, moreRes = true) {
-    this.sendBasic(C2SPacketType.SPAWN, {name: name, skin: skin, moofoll: moreRes});
+  spawn(sname = "moomooapi", sskin = SkinColours.RED, moreRes = true) {
+    this.sendBasic(C2SPacketType.SPAWN, {name: sname, skin: sskin, moofoll: moreRes});
   }
 
   /**
    * Helper method to set hand to an item or weapon
    * @param id Id of item or weapon to set to
-   * @param isWeapon 
+   * @param isWeapon Boolean on wether or not it is switching to a weapon
    */
 
   setHand(id: ItemIds | WeaponIds, isWeapon: boolean) {
     this.sendBasic(C2SPacketType.SELECT_ITEM, id, isWeapon);
   }
 
+  /**
+   * Sets currently held item.
+   * @param id Id of the item to set to
+   */
+
   setItem(id: ItemIds) {
     this.setHand(id, false);
   }
+
+  /**
+   * Sets the currently held weapon
+   * @param id Id of the weapon to set to
+   */
 
   setWeapon(id: WeaponIds) {
     this.setHand(id, true);
   }
 
+  /**
+   * Begins or ends attacking
+   * @param on Boolean value if should begin attacking, or stop attacking
+   * @param direction Direction to attack in
+   */
+
   attack(on: boolean, direction: number | null = null) {
     this.sendBasic(C2SPacketType.ATTACK, on, direction);
   }
+
+  /**
+   * Attacks only once when called
+   * @param direction Direction to attack in
+   */
 
   singleSwing(direction: number | null = null) {
     this.attack(true, direction);
     this.attack(false);
   }
+
+  /**
+   * Places an item
+   * @param item Type of item to place
+   * @param direction Direction of item to place
+   */
 
   placeItem(item: ItemIds, direction: number | null = null) {
     this.setItem(item);

@@ -67,7 +67,11 @@ export class Player implements IPlayerDat{
 
 
 export type WeaponsType = [number, numu];
-export type ItemsType = [number, number, number, number, numu, numu, numu, numu]
+export type ItemsType = [number, number, number, number, numu, numu, numu, numu];
+
+/**
+ * Self player class with more data than that of the player class
+ */
 
 export class SelfPlayer extends Player {
     weapons: WeaponsType = [WeaponIds.TOOL_HAMMER, undefined];

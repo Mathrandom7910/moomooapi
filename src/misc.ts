@@ -17,16 +17,37 @@ export enum SkinColours {
     SECRETLIGHTBLUE = "length"
 }
 
+/**
+ * Repeater class used to repeat a specific action
+ */
+
 export class Repeater {
     intervalId = -1;
-    constructor(readonly cb: Function, readonly int: number, readonly keyCode: number) {
+
+    /**
+     * Repeater constructor
+     * @param cb Callback function to call on every interval
+     * @param int The time (milliseconds) to repeat the action
+     * @param keyCode The keycode on if it should start or stop on action
+     */
+    constructor(public cb: Function, public int: number, public keyCode: number) {
 
     }
+
+    /**
+     * Starts the repeater if the given keycode matches the one input
+     * @param keyCode The keycode to check
+     */
 
     start(keyCode: number) {
         if(this.keyCode != keyCode) return;
         this.intervalId = setInterval(this.cb, this.int);
     }
+
+    /**
+     * Stops the reapeater if the keycode matches the one input
+     * @param keyCode The keycode to check
+     */
 
     stop(keyCode: number) {
         if(this.keyCode != keyCode) return;
