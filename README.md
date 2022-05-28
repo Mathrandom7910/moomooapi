@@ -4,7 +4,7 @@ An api written for the browser game moomoo.io
 
 The transpiled javascript can be found in the <a href="https://github.com/Mathrandom7910/moomooapi/tree/master/dist">distributions folder.</a>
 It can alternatively be required for userscripts with 
-`//@require https://raw.githubusercontent.com/Mathrandom7910/moomooapi/master/dist/MooMooAPI.umd.js`
+`// @require https://raw.githubusercontent.com/Mathrandom7910/moomooapi/master/dist/MooMooAPI.umd.js`
 
 Examples can be viewed at the <a href="https://github.com/Mathrandom7910/moomooapi/tree/master/examples">examples folder.</a>
 
