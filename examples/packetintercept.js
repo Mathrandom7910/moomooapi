@@ -4,7 +4,7 @@ const api = new MooMooAPI();
 //To avoid this, use api.sendHidden() to send raw data to the server, for more info, view the docs
 //This also can be a bad method to use, since some aspects of the api (namely the alive detection) require listening to outgoing packets
 api.on("packetSend", (e) => {
-    if(e.type == MooMooAPI.C2SPacketType.spawn && e.payload[0].name != "override") {
+    if(e.type == MooMooAPI.C2SPacketType.SPAWN && e.payload[0].name != "override") {
         api.spawn("override");
     }
 });
