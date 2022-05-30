@@ -5,9 +5,10 @@ import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
 import { Repeater, SkinColours } from "./misc";
 import { ObjectRemoveReason, IObject } from "./gameobject";
-import { ItemIds } from "./data/items";
-import { WeaponIds } from "./data/weapons";
-import { HatIds } from "./data/hats";
+import { ItemIds } from "./data/objects/items";
+import { WeaponIds } from "./data/objects/weapons";
+import { HatIds } from "./data/gear/hats";
+import { AccessoryIds } from "./data/gear/accessories";
 
 var mLoc = <any> msgpack;
 export const msgpack2 = <typeof msgpack> mLoc.msgpack;
@@ -30,6 +31,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   static Repeater = Repeater;
   static msgpack = msgpack2;
   static HatIds = HatIds;
+  static AccessoryIds = AccessoryIds;
 
   /**
    * The raw websocket to interact with the game
@@ -387,13 +389,11 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.sendBasic(C2SPacketType.AUTO_ATTACK, 1);
   }
 
-  setGear(buy: boolean, id: HatIds, isAccessory: boolean) {
-    //            buy id  acc
-    //send("13c", 0, id, 1);
+  setGear(buy: boolean, id: HatIds | AccessoryIds, isAccessory: boolean) {
     this.sendBasic(C2SPacketType.BUY_AND_EQUIP, buy, id, isAccessory);
   }
 
-  buyGear(id: HatIds, isAccessory: boolean) {
+  buyGear(id: HatIds | AccessoryIds, isAccessory: boolean) {
     this.setGear(true, id, isAccessory);
   }
 
@@ -401,12 +401,20 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.buyGear(id, false);
   }
 
-  equipGear(id: HatIds, isAccessory: boolean) {
+  equipGear(id: HatIds | AccessoryIds, isAccessory: boolean) {
     this.setGear(false, id, isAccessory);
   }
 
   equipHat(id: HatIds) {
     this.equipGear(id, false);
+  }
+
+  buyAccessory(id: AccessoryIds) {
+    this.buyGear(id, true);
+  }
+
+  equipAccessory(id: AccessoryIds) {
+    this.equipGear(id, true);
   }
 }
 

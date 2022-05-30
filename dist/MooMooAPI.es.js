@@ -1078,6 +1078,12 @@ class MooMooAPI extends EventEmitter {
   equipHat(id) {
     this.equipGear(id, false);
   }
+  buyAccessory(id) {
+    this.buyGear(id, true);
+  }
+  equipAccessory(id) {
+    this.equipGear(id, true);
+  }
 }
 MooMooAPI.SkinColours = SkinColours;
 MooMooAPI.C2SPacketType = C2SPacketType;

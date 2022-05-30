@@ -2,8 +2,8 @@
  * Player interface containing info sent on every game tick
  */
 
-import { ItemIds } from "./data/items";
-import { WeaponIds } from "./data/weapons";
+import { ItemIds } from "./data/objects/items";
+import { WeaponIds } from "./data/objects/weapons";
 import { numu } from "./misc";
 
 export interface IPlayerDat {
