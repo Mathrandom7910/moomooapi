@@ -1,6 +1,6 @@
 # MOOMOOAPI
 
-An api written for the browser game moomoo.io
+An api written for the browser game moomoo.io meant ONLY for the browser
 
 The transpiled javascript can be found in the <a href="https://github.com/Mathrandom7910/moomooapi/tree/master/dist">distributions folder.</a>
 It can alternatively be required for userscripts with 
