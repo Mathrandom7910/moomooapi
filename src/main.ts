@@ -145,7 +145,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
                 x: plinf[1],
                 y: plinf[2],
                 dir: plinf[3],
-                obj: plinf[4],
+                currentObject: plinf[4],
                 wep: plinf[5],
                 variant: plinf[6],
                 tribe: plinf[7],
@@ -341,6 +341,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    */
 
   setItem(id: ItemIds) {
+    if(this.player.currentObject == id) return;
     this.setHand(id, false);
   }
 
@@ -415,6 +416,10 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   equipAccessory(id: AccessoryIds) {
     this.equipGear(id, true);
+  }
+
+  chat(text: string) {
+    this.sendBasic(C2SPacketType.CHAT, text);
   }
 }
 

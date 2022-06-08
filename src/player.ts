@@ -11,7 +11,7 @@ export interface IPlayerDat {
     y: number;
     sid: number;
     dir: number;
-    obj: number;
+    currentObject: number;
     wep: number;
     variant: number;
     tribe: string;
@@ -32,7 +32,7 @@ export class Player implements IPlayerDat{
     sid: number = -2;
     id: string = "NULL";
     dir: number = 0;
-    obj: number = -2;
+    currentObject: number = -2;
     wep: number = -2;
     variant: number = -2;
     tribe: string = "NULL";
@@ -52,7 +52,7 @@ export class Player implements IPlayerDat{
         this.y = dat.y;
         this.sid = dat.sid;
         this.dir = dat.dir;
-        this.obj = dat.obj;
+        this.currentObject = dat.currentObject;
         this.wep = dat.wep;
         this.variant = dat.variant;
         this.tribe = dat.tribe;
