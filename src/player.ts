@@ -123,10 +123,10 @@ export class SelfPlayer extends Player {
     }
 
     getPrimaryType() {
-        return this.items[0];
+        return this.weapons[0];
     }
 
     getSecondaryType() {
-        return this.items[1];
+        return this.weapons[1];
     }
 }
