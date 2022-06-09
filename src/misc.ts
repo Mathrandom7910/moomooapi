@@ -21,16 +21,16 @@ export enum SkinColours {
  * Repeater class used to repeat a specific action
  */
 
-export class Repeater {
-    intervalId = -1;
+ export class Repeater {
+    intervalId: numull = null;
 
     /**
      * Repeater constructor
      * @param cb Callback function to call on every interval
-     * @param int The time (milliseconds) to repeat the action
+     * @param msInterval The time (milliseconds) to repeat the action
      * @param keyCode The keycode on if it should start or stop on action
      */
-    constructor(public cb: Function, public int: number, public keyCode: number) {
+    constructor(public cb: Function, public msInterval: number, public keyCode: number) {
 
     }
 
@@ -40,8 +40,8 @@ export class Repeater {
      */
 
     start(keyCode: number) {
-        if(this.keyCode != keyCode) return;
-        this.intervalId = setInterval(this.cb, this.int);
+        if(this.keyCode != keyCode || this.intervalId != null) return;
+        this.intervalId = setInterval(this.cb, this.msInterval);
     }
 
     /**
@@ -50,9 +50,9 @@ export class Repeater {
      */
 
     stop(keyCode: number) {
-        if(this.keyCode != keyCode) return;
+        if(this.keyCode != keyCode || this.intervalId == null) return;
         clearInterval(this.intervalId);
-        this.intervalId = -1;
+        this.intervalId = null;
     }
 }
 

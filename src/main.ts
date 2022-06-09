@@ -1,5 +1,5 @@
 
-import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent } from "./events";
+import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent, DatalessEvent } from "./events";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
@@ -62,6 +62,10 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    */
 
   alive = false;
+
+  hatsOwned: Record<number, boolean> = {};
+
+  accessoriesOwned: Record<number, boolean> = {}
 
   constructor(dynws = false) {
     super();
@@ -138,6 +142,8 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         break;
 
         case S2CPacketType.UPDAE_PLAYERS:
+          this.emit("serverTick", new DatalessEvent());
+          var players: IPlayerDat[] = [];
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
             const thisPlayer: IPlayerDat = {
@@ -161,6 +167,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
             }
           this.emit("updatePlayer", thisPlayer);
           this.players[thisPlayer.sid].assign(thisPlayer);
+          players.push(thisPlayer);
           }
         break;
 
@@ -254,6 +261,36 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           }, 3000) as unknown as number;
           this.emit("chat", new ChatEvent(sidMsg, msg));
         break;
+
+        case S2CPacketType.UPDATE_SHOP:
+          /*function updateStoreItems(type, id, index) {
+            if (index) {
+                if (!type)
+                    player.tails[id] = 1;
+                else
+                    player.tailIndex = id;
+            } else {
+                if (!type)
+                    player.skins[id] = 1;
+                else
+                    player.skinIndex = id;
+            }
+            if (storeMenu.style.display == "block")
+                generateStoreList();
+        }*/
+        const isSetGear = payload[0] as boolean;
+        if(isSetGear) break;
+
+        const isAcc = payload[2] as boolean;
+        const gearId = payload[1] as number;
+
+        if(isAcc) {
+          this.accessoriesOwned[gearId] = true;
+        } else {
+          this.hatsOwned[gearId] = true;
+        }
+
+        break;
       }
     });
   }
@@ -341,7 +378,6 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    */
 
   setItem(id: ItemIds) {
-    if(this.player.currentObject == id) return;
     this.setHand(id, false);
   }
 

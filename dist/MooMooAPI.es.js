@@ -60,6 +60,11 @@ class ChatEvent extends Evt {
     this.message = message;
   }
 }
+class DatalessEvent extends Evt {
+  constructor() {
+    super("dataless");
+  }
+}
 class Eventable {
   constructor(name, cb, once = false) {
     this.name = name;
@@ -205,7 +210,7 @@ class Player {
     this.sid = -2;
     this.id = "NULL";
     this.dir = 0;
-    this.obj = -2;
+    this.currentObject = -2;
     this.wep = -2;
     this.variant = -2;
     this.tribe = "NULL";
@@ -224,7 +229,7 @@ class Player {
     this.y = dat.y;
     this.sid = dat.sid;
     this.dir = dat.dir;
-    this.obj = dat.obj;
+    this.currentObject = dat.currentObject;
     this.wep = dat.wep;
     this.variant = dat.variant;
     this.tribe = dat.tribe;
@@ -273,10 +278,10 @@ class SelfPlayer extends Player {
     return this.items[4] || null;
   }
   getPrimaryType() {
-    return this.items[0];
+    return this.weapons[0];
   }
   getSecondaryType() {
-    return this.items[1];
+    return this.weapons[1];
   }
 }
 function serialize(data) {
@@ -763,7 +768,7 @@ class Repeater {
     this.intervalId = -1;
   }
   start(keyCode) {
-    if (this.keyCode != keyCode)
+    if (this.keyCode != keyCode || this.intervalId != -1)
       return;
     this.intervalId = setInterval(this.cb, this.int);
   }
@@ -828,6 +833,30 @@ var HatIds = /* @__PURE__ */ ((HatIds2) => {
   HatIds2[HatIds2["Assassin_GEAR"] = 56] = "Assassin_GEAR";
   return HatIds2;
 })(HatIds || {});
+var AccessoryIds = /* @__PURE__ */ ((AccessoryIds2) => {
+  AccessoryIds2[AccessoryIds2["SNOWBALL"] = 12] = "SNOWBALL";
+  AccessoryIds2[AccessoryIds2["TREE_CAPE"] = 9] = "TREE_CAPE";
+  AccessoryIds2[AccessoryIds2["STONE_CAPE"] = 10] = "STONE_CAPE";
+  AccessoryIds2[AccessoryIds2["COOKIE_CAPE"] = 3] = "COOKIE_CAPE";
+  AccessoryIds2[AccessoryIds2["COW_CAPE"] = 8] = "COW_CAPE";
+  AccessoryIds2[AccessoryIds2["MONKEY_TAIL"] = 11] = "MONKEY_TAIL";
+  AccessoryIds2[AccessoryIds2["APPLE_BASKET"] = 17] = "APPLE_BASKET";
+  AccessoryIds2[AccessoryIds2["WINTER_CAPE"] = 6] = "WINTER_CAPE";
+  AccessoryIds2[AccessoryIds2["SKULL_CAPE"] = 4] = "SKULL_CAPE";
+  AccessoryIds2[AccessoryIds2["DASH_CAPE"] = 5] = "DASH_CAPE";
+  AccessoryIds2[AccessoryIds2["DRAGON_CAPE"] = 2] = "DRAGON_CAPE";
+  AccessoryIds2[AccessoryIds2["SUPER_CAPE"] = 1] = "SUPER_CAPE";
+  AccessoryIds2[AccessoryIds2["TROLL_CAPE"] = 7] = "TROLL_CAPE";
+  AccessoryIds2[AccessoryIds2["THORNS"] = 14] = "THORNS";
+  AccessoryIds2[AccessoryIds2["BLOCKADES"] = 15] = "BLOCKADES";
+  AccessoryIds2[AccessoryIds2["DEVILS_TAIL"] = 20] = "DEVILS_TAIL";
+  AccessoryIds2[AccessoryIds2["SAWBLADE"] = 16] = "SAWBLADE";
+  AccessoryIds2[AccessoryIds2["ANGEL_WINGS"] = 13] = "ANGEL_WINGS";
+  AccessoryIds2[AccessoryIds2["SHADOW_WINGS"] = 19] = "SHADOW_WINGS";
+  AccessoryIds2[AccessoryIds2["BLOOD_WINGS"] = 18] = "BLOOD_WINGS";
+  AccessoryIds2[AccessoryIds2["CORRUPT_X_WINGS"] = 21] = "CORRUPT_X_WINGS";
+  return AccessoryIds2;
+})(AccessoryIds || {});
 var mLoc = msgpack$1;
 const msgpack2 = mLoc.msgpack;
 class MooMooAPI extends EventEmitter {
@@ -838,6 +867,8 @@ class MooMooAPI extends EventEmitter {
     this.players = [];
     this.gameObjects = [];
     this.alive = false;
+    this.hatsOwned = {};
+    this.accessoriesOwned = {};
     const that = this;
     if (dynws) {
       Object.defineProperty(WebSocket.prototype, "hiddenSend", {
@@ -903,6 +934,8 @@ class MooMooAPI extends EventEmitter {
           this.player.sid = payload[0];
           break;
         case S2CPacketType.UPDAE_PLAYERS:
+          this.emit("serverTick", new DatalessEvent());
+          var players = [];
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
             const thisPlayer = {
@@ -910,7 +943,7 @@ class MooMooAPI extends EventEmitter {
               x: plinf[1],
               y: plinf[2],
               dir: plinf[3],
-              obj: plinf[4],
+              currentObject: plinf[4],
               wep: plinf[5],
               variant: plinf[6],
               tribe: plinf[7],
@@ -926,6 +959,7 @@ class MooMooAPI extends EventEmitter {
             }
             this.emit("updatePlayer", thisPlayer);
             this.players[thisPlayer.sid].assign(thisPlayer);
+            players.push(thisPlayer);
           }
           break;
         case S2CPacketType.REMOVE_PLAYER:
@@ -1008,6 +1042,18 @@ class MooMooAPI extends EventEmitter {
           }, 3e3);
           this.emit("chat", new ChatEvent(sidMsg, msg));
           break;
+        case S2CPacketType.UPDATE_SHOP:
+          const isSetGear = payload[0];
+          if (isSetGear)
+            break;
+          const isAcc = payload[2];
+          const gearId = payload[1];
+          if (isAcc) {
+            this.accessoriesOwned[gearId] = true;
+          } else {
+            this.hatsOwned[gearId] = true;
+          }
+          break;
       }
     });
   }
@@ -1043,6 +1089,8 @@ class MooMooAPI extends EventEmitter {
     this.sendBasic(C2SPacketType.SELECT_ITEM, id, isWeapon);
   }
   setItem(id) {
+    if (this.player.currentObject == id)
+      return;
     this.setHand(id, false);
   }
   setWeapon(id) {
@@ -1084,6 +1132,9 @@ class MooMooAPI extends EventEmitter {
   equipAccessory(id) {
     this.equipGear(id, true);
   }
+  chat(text) {
+    this.sendBasic(C2SPacketType.CHAT, text);
+  }
 }
 MooMooAPI.SkinColours = SkinColours;
 MooMooAPI.C2SPacketType = C2SPacketType;
@@ -1094,6 +1145,7 @@ MooMooAPI.WeaponIds = WeaponIds;
 MooMooAPI.Repeater = Repeater;
 MooMooAPI.msgpack = msgpack2;
 MooMooAPI.HatIds = HatIds;
+MooMooAPI.AccessoryIds = AccessoryIds;
 Object.defineProperty(window, "MooMooAPI", {
   value: MooMooAPI
 });

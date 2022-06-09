@@ -70,7 +70,7 @@ export class HealthEvent extends Evt {
  * Update player event, called every 110 ms to update the players within range
  */
 
-export class UpdatePlayersEvent extends Evt {
+export class UpdatePlayerEvent extends Evt {
     constructor() {
         super("updateplayer");
     }
@@ -112,6 +112,12 @@ export class ChatEvent extends Evt {
     }
 }
 
+export class DatalessEvent extends Evt {
+    constructor() {
+        super("dataless");
+    }
+}
+
 class Eventable {
     constructor(public name: string | number | symbol, public cb: Function, public once = false) {
         
@@ -131,7 +137,8 @@ export interface PlayerEvents {
     addPlayer: PlayerEvent,
     addObject: ObjectAddEvent,
     removeObject: ObjectRemoveEvent,
-    chat: ChatEvent
+    chat: ChatEvent,
+    serverTick: DatalessEvent
 }
 
 export class EventEmitter<Map> {
