@@ -118,6 +118,12 @@ export class DatalessEvent extends Evt {
     }
 }
 
+export class ServerTickEvent extends Evt {
+    constructor(public playerData: IPlayerDat[]) {
+        super("servertick")
+    }
+}
+
 class Eventable {
     constructor(public name: string | number | symbol, public cb: Function, public once = false) {
         
@@ -138,7 +144,7 @@ export interface PlayerEvents {
     addObject: ObjectAddEvent,
     removeObject: ObjectRemoveEvent,
     chat: ChatEvent,
-    serverTick: PacketEvent
+    serverTick: ServerTickEvent
 }
 
 export class EventEmitter<Map> {
