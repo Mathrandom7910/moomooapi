@@ -138,7 +138,7 @@ export interface PlayerEvents {
     addObject: ObjectAddEvent,
     removeObject: ObjectRemoveEvent,
     chat: ChatEvent,
-    serverTick: DatalessEvent
+    serverTick: PacketEvent
 }
 
 export class EventEmitter<Map> {

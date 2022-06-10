@@ -60,11 +60,6 @@ class ChatEvent extends Evt {
     this.message = message;
   }
 }
-class DatalessEvent extends Evt {
-  constructor() {
-    super("dataless");
-  }
-}
 class Eventable {
   constructor(name, cb, once = false) {
     this.name = name;
@@ -761,22 +756,22 @@ var SkinColours = /* @__PURE__ */ ((SkinColours2) => {
   return SkinColours2;
 })(SkinColours || {});
 class Repeater {
-  constructor(cb, int, keyCode) {
+  constructor(cb, msInterval, keyCode) {
     this.cb = cb;
-    this.int = int;
+    this.msInterval = msInterval;
     this.keyCode = keyCode;
-    this.intervalId = -1;
+    this.intervalId = null;
   }
   start(keyCode) {
-    if (this.keyCode != keyCode || this.intervalId != -1)
+    if (this.keyCode != keyCode || this.intervalId != null)
       return;
-    this.intervalId = setInterval(this.cb, this.int);
+    this.intervalId = setInterval(this.cb, this.msInterval);
   }
   stop(keyCode) {
-    if (this.keyCode != keyCode)
+    if (this.keyCode != keyCode || this.intervalId == null)
       return;
     clearInterval(this.intervalId);
-    this.intervalId = -1;
+    this.intervalId = null;
   }
 }
 var ObjectRemoveReason = /* @__PURE__ */ ((ObjectRemoveReason2) => {
@@ -934,7 +929,7 @@ class MooMooAPI extends EventEmitter {
           this.player.sid = payload[0];
           break;
         case S2CPacketType.UPDAE_PLAYERS:
-          this.emit("serverTick", new DatalessEvent());
+          this.emit("serverTick", packEvt);
           var players = [];
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
@@ -1089,8 +1084,6 @@ class MooMooAPI extends EventEmitter {
     this.sendBasic(C2SPacketType.SELECT_ITEM, id, isWeapon);
   }
   setItem(id) {
-    if (this.player.currentObject == id)
-      return;
     this.setHand(id, false);
   }
   setWeapon(id) {

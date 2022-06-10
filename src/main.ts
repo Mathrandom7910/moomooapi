@@ -1,5 +1,5 @@
 
-import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent, DatalessEvent } from "./events";
+import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent } from "./events";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
@@ -142,7 +142,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         break;
 
         case S2CPacketType.UPDAE_PLAYERS:
-          this.emit("serverTick", new DatalessEvent());
+          this.emit("serverTick", packEvt);
           var players: IPlayerDat[] = [];
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
