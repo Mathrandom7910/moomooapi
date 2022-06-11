@@ -7,8 +7,8 @@ import { Repeater, SkinColours } from "./misc";
 import { ObjectRemoveReason, IObject } from "./gameobject";
 import { ItemIds } from "./data/objects/items";
 import { WeaponIds } from "./data/objects/weapons";
-import { HatIds } from "./data/gear/hats";
-import { AccessoryIds } from "./data/gear/accessories";
+import { HatIds, hats } from "./data/gear/hats";
+import { accessories, AccessoryIds } from "./data/gear/accessories";
 
 var mLoc = <any> msgpack;
 export const msgpack2 = <typeof msgpack> mLoc.msgpack;
@@ -116,6 +116,20 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         value: WS
       });
     }
+
+    hats.forEach(hat => {
+      if(hat.price <= 0 && !hat.dontSell) {
+        this.hatsOwned[hat.id] = true;
+      }
+    });
+
+    // no free accessories, incase of highly improbably update
+
+    accessories.forEach(acc => {
+      if(acc.price <= 0) {
+        this.accessoriesOwned[acc.id] = true;
+      }
+    });
   }
 
   private initSocket() {

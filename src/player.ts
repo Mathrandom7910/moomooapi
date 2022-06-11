@@ -1,10 +1,11 @@
-/**
- * Player interface containing info sent on every game tick
- */
-
 import { ItemIds } from "./data/objects/items";
 import { WeaponIds } from "./data/objects/weapons";
 import { numu } from "./misc";
+import { Pos } from "@mathrandom7910/pos";
+
+/**
+ * Player interface containing info sent on every game tick
+ */
 
 export interface IPlayerDat {
     x: number;
@@ -26,7 +27,7 @@ export interface IPlayerDat {
  * Player class containing information on a specific player
  */
 
-export class Player implements IPlayerDat{
+export class Player implements IPlayerDat {
     x: number = -2;
     y: number = -2;
     sid: number = -2;
@@ -61,6 +62,15 @@ export class Player implements IPlayerDat{
         this.acc = dat.acc;
         this.isSkull = dat.isSkull;
         this.zIndex = dat.zIndex;
+    }
+
+    /**
+     * Returns a position object which can be used to perform math calculations easily
+     * @returns Position object
+     */
+
+    getAsPos() {
+        return new Pos(this.x, this.y);
     }
 }
 

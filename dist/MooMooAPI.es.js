@@ -60,6 +60,12 @@ class ChatEvent extends Evt {
     this.message = message;
   }
 }
+class ServerTickEvent extends Evt {
+  constructor(playerData) {
+    super("servertick");
+    this.playerData = playerData;
+  }
+}
 class Eventable {
   constructor(name, cb, once = false) {
     this.name = name;
@@ -198,6 +204,53 @@ var WeaponIds = /* @__PURE__ */ ((WeaponIds2) => {
   WeaponIds2[WeaponIds2["MUSKET"] = 15] = "MUSKET";
   return WeaponIds2;
 })(WeaponIds || {});
+var src = {};
+Object.defineProperty(src, "__esModule", { value: true });
+var Pos_1 = src.Pos = src.PrimitivePos = void 0;
+class PrimitivePos {
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }
+  normalize() {
+    return new Pos(this.x, this.y);
+  }
+}
+src.PrimitivePos = PrimitivePos;
+class Pos extends PrimitivePos {
+  constructor(x = 0, y = 0) {
+    super(x, y);
+    this.x = x;
+    this.y = y;
+  }
+  clone() {
+    return new Pos(this.x, this.y);
+  }
+  addX(x) {
+    const clone = this.clone();
+    clone.x += x;
+    return clone;
+  }
+  addY(y) {
+    const clone = this.clone();
+    clone.y += y;
+    return clone;
+  }
+  add(x, y) {
+    if (x instanceof Pos) {
+      return this.addX(x.x).addY(x.y);
+    } else {
+      return this.addX(x).addY(y || 0);
+    }
+  }
+  toString() {
+    return `X: ${this.x} Y: ${this.y}`;
+  }
+  asPrimitive() {
+    return new PrimitivePos(this.x, this.y);
+  }
+}
+Pos_1 = src.Pos = Pos;
 class Player {
   constructor() {
     this.x = -2;
@@ -233,6 +286,9 @@ class Player {
     this.acc = dat.acc;
     this.isSkull = dat.isSkull;
     this.zIndex = dat.zIndex;
+  }
+  getAsPos() {
+    return new Pos_1(this.x, this.y);
   }
 }
 class SelfPlayer extends Player {
@@ -828,6 +884,325 @@ var HatIds = /* @__PURE__ */ ((HatIds2) => {
   HatIds2[HatIds2["Assassin_GEAR"] = 56] = "Assassin_GEAR";
   return HatIds2;
 })(HatIds || {});
+const hats = [{
+  id: 45,
+  name: "Shame!",
+  dontSell: true,
+  price: 0,
+  scale: 120,
+  desc: "hacks are for losers"
+}, {
+  id: 51,
+  name: "Moo Cap",
+  price: 0,
+  scale: 120,
+  desc: "coolest mooer around"
+}, {
+  id: 50,
+  name: "Apple Cap",
+  price: 0,
+  scale: 120,
+  desc: "apple farms remembers"
+}, {
+  id: 28,
+  name: "Moo Head",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 29,
+  name: "Pig Head",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 30,
+  name: "Fluff Head",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 36,
+  name: "Pandou Head",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 37,
+  name: "Bear Head",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 38,
+  name: "Monkey Head",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 44,
+  name: "Polar Head",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 35,
+  name: "Fez Hat",
+  price: 0,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 42,
+  name: "Enigma Hat",
+  price: 0,
+  scale: 120,
+  desc: "join the enigma army"
+}, {
+  id: 43,
+  name: "Blitz Hat",
+  price: 0,
+  scale: 120,
+  desc: "hey everybody i'm blitz"
+}, {
+  id: 49,
+  name: "Bob XIII Hat",
+  price: 0,
+  scale: 120,
+  desc: "like and subscribe"
+}, {
+  id: 57,
+  name: "Pumpkin",
+  price: 50,
+  scale: 120,
+  desc: "Spooooky"
+}, {
+  id: 8,
+  name: "Bummle Hat",
+  price: 100,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 2,
+  name: "Straw Hat",
+  price: 500,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 15,
+  name: "Winter Cap",
+  price: 600,
+  scale: 120,
+  desc: "allows you to move at normal speed in snow",
+  coldM: 1
+}, {
+  id: 5,
+  name: "Cowboy Hat",
+  price: 1e3,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 4,
+  name: "Ranger Hat",
+  price: 2e3,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 18,
+  name: "Explorer Hat",
+  price: 2e3,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 31,
+  name: "Flipper Hat",
+  price: 2500,
+  scale: 120,
+  desc: "have more control while in water",
+  watrImm: true
+}, {
+  id: 1,
+  name: "Marksman Cap",
+  price: 3e3,
+  scale: 120,
+  desc: "increases arrow speed and range",
+  aMlt: 1.3
+}, {
+  id: 10,
+  name: "Bush Gear",
+  price: 3e3,
+  scale: 160,
+  desc: "allows you to disguise yourself as a bush"
+}, {
+  id: 48,
+  name: "Halo",
+  price: 3e3,
+  scale: 120,
+  desc: "no effect"
+}, {
+  id: 6,
+  name: "Soldier Helmet",
+  price: 4e3,
+  scale: 120,
+  desc: "reduces damage taken but slows movement",
+  spdMult: 0.94,
+  dmgMult: 0.75
+}, {
+  id: 23,
+  name: "Anti Venom Gear",
+  price: 4e3,
+  scale: 120,
+  desc: "makes you immune to poison",
+  poisonRes: 1
+}, {
+  id: 13,
+  name: "Medic Gear",
+  price: 5e3,
+  scale: 110,
+  desc: "slowly regenerates health over time",
+  healthRegen: 3
+}, {
+  id: 9,
+  name: "Miners Helmet",
+  price: 5e3,
+  scale: 120,
+  desc: "earn 1 extra gold per resource",
+  extraGold: 1
+}, {
+  id: 32,
+  name: "Musketeer Hat",
+  price: 5e3,
+  scale: 120,
+  desc: "reduces cost of projectiles",
+  projCost: 0.5
+}, {
+  id: 7,
+  name: "Bull Helmet",
+  price: 6e3,
+  scale: 120,
+  desc: "increases damage done but drains health",
+  healthRegen: -5,
+  dmgMultO: 1.5,
+  spdMult: 0.96
+}, {
+  id: 22,
+  name: "Emp Helmet",
+  price: 6e3,
+  scale: 120,
+  desc: "turrets won't attack but you move slower",
+  antiTurret: 1,
+  spdMult: 0.7
+}, {
+  id: 12,
+  name: "Booster Hat",
+  price: 6e3,
+  scale: 120,
+  desc: "increases your movement speed",
+  spdMult: 1.16
+}, {
+  id: 26,
+  name: "Barbarian Armor",
+  price: 8e3,
+  scale: 120,
+  desc: "knocks back enemies that attack you",
+  dmgK: 0.6
+}, {
+  id: 21,
+  name: "Plague Mask",
+  price: 1e4,
+  scale: 120,
+  desc: "melee attacks deal poison damage",
+  poisonDmg: 5,
+  poisonTime: 6
+}, {
+  id: 46,
+  name: "Bull Mask",
+  price: 1e4,
+  scale: 120,
+  desc: "bulls won't target you unless you attack them",
+  bullRepel: 1
+}, {
+  id: 14,
+  name: "Windmill Hat",
+  topSprite: true,
+  price: 1e4,
+  scale: 120,
+  desc: "generates points while worn",
+  pps: 1.5
+}, {
+  id: 11,
+  name: "Spike Gear",
+  topSprite: true,
+  price: 1e4,
+  scale: 120,
+  desc: "deal damage to players that damage you",
+  dmg: 0.45
+}, {
+  id: 53,
+  name: "Turret Gear",
+  topSprite: true,
+  price: 1e4,
+  scale: 120,
+  desc: "you become a walking turret",
+  turret: {
+    proj: 1,
+    range: 700,
+    rate: 2500
+  },
+  spdMult: 0.7
+}, {
+  id: 20,
+  name: "Samurai Armor",
+  price: 12e3,
+  scale: 120,
+  desc: "increased attack speed and fire rate",
+  atkSpd: 0.78
+}, {
+  id: 58,
+  name: "Dark Knight",
+  price: 12e3,
+  scale: 120,
+  desc: "restores health when you deal damage",
+  healD: 0.4
+}, {
+  id: 27,
+  name: "Scavenger Gear",
+  price: 15e3,
+  scale: 120,
+  desc: "earn double points for each kill",
+  kScrM: 2
+}, {
+  id: 40,
+  name: "Tank Gear",
+  price: 15e3,
+  scale: 120,
+  desc: "increased damage to buildings but slower movement",
+  spdMult: 0.3,
+  bDmg: 3.3
+}, {
+  id: 52,
+  name: "Thief Gear",
+  price: 15e3,
+  scale: 120,
+  desc: "steal half of a players gold when you kill them",
+  goldSteal: 0.5
+}, {
+  id: 55,
+  name: "Bloodthirster",
+  price: 2e4,
+  scale: 120,
+  desc: "Restore Health when dealing damage. And increased damage",
+  healD: 0.25,
+  dmgMultO: 1.2
+}, {
+  id: 56,
+  name: "Assassin Gear",
+  price: 2e4,
+  scale: 120,
+  desc: "Go invisible when not moving. Can't eat. Increased speed",
+  noEat: true,
+  spdMult: 1.1,
+  invisTimer: 1e3
+}];
 var AccessoryIds = /* @__PURE__ */ ((AccessoryIds2) => {
   AccessoryIds2[AccessoryIds2["SNOWBALL"] = 12] = "SNOWBALL";
   AccessoryIds2[AccessoryIds2["TREE_CAPE"] = 9] = "TREE_CAPE";
@@ -852,6 +1227,153 @@ var AccessoryIds = /* @__PURE__ */ ((AccessoryIds2) => {
   AccessoryIds2[AccessoryIds2["CORRUPT_X_WINGS"] = 21] = "CORRUPT_X_WINGS";
   return AccessoryIds2;
 })(AccessoryIds || {});
+const accessories = [{
+  id: 12,
+  name: "Snowball",
+  price: 1e3,
+  scale: 105,
+  xOff: 18,
+  desc: "no effect"
+}, {
+  id: 9,
+  name: "Tree Cape",
+  price: 1e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 10,
+  name: "Stone Cape",
+  price: 1e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 3,
+  name: "Cookie Cape",
+  price: 1500,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 8,
+  name: "Cow Cape",
+  price: 2e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 11,
+  name: "Monkey Tail",
+  price: 2e3,
+  scale: 97,
+  xOff: 25,
+  desc: "Super speed but reduced damage",
+  spdMult: 1.35,
+  dmgMultO: 0.2
+}, {
+  id: 17,
+  name: "Apple Basket",
+  price: 3e3,
+  scale: 80,
+  xOff: 12,
+  desc: "slowly regenerates health over time",
+  healthRegen: 1
+}, {
+  id: 6,
+  name: "Winter Cape",
+  price: 3e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 4,
+  name: "Skull Cape",
+  price: 4e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 5,
+  name: "Dash Cape",
+  price: 5e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 2,
+  name: "Dragon Cape",
+  price: 6e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 1,
+  name: "Super Cape",
+  price: 8e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 7,
+  name: "Troll Cape",
+  price: 8e3,
+  scale: 90,
+  desc: "no effect"
+}, {
+  id: 14,
+  name: "Thorns",
+  price: 1e4,
+  scale: 115,
+  xOff: 20,
+  desc: "no effect"
+}, {
+  id: 15,
+  name: "Blockades",
+  price: 1e4,
+  scale: 95,
+  xOff: 15,
+  desc: "no effect"
+}, {
+  id: 20,
+  name: "Devils Tail",
+  price: 1e4,
+  scale: 95,
+  xOff: 20,
+  desc: "no effect"
+}, {
+  id: 16,
+  name: "Sawblade",
+  price: 12e3,
+  scale: 90,
+  spin: true,
+  xOff: 0,
+  desc: "deal damage to players that damage you",
+  dmg: 0.15
+}, {
+  id: 13,
+  name: "Angel Wings",
+  price: 15e3,
+  scale: 138,
+  xOff: 22,
+  desc: "slowly regenerates health over time",
+  healthRegen: 3
+}, {
+  id: 19,
+  name: "Shadow Wings",
+  price: 15e3,
+  scale: 138,
+  xOff: 22,
+  desc: "increased movement speed",
+  spdMult: 1.1
+}, {
+  id: 18,
+  name: "Blood Wings",
+  price: 2e4,
+  scale: 178,
+  xOff: 26,
+  desc: "restores health when you deal damage",
+  healD: 0.2
+}, {
+  id: 21,
+  name: "Corrupt X Wings",
+  price: 2e4,
+  scale: 178,
+  xOff: 26,
+  desc: "deal damage to players that damage you",
+  dmg: 0.25
+}];
 var mLoc = msgpack$1;
 const msgpack2 = mLoc.msgpack;
 class MooMooAPI extends EventEmitter {
@@ -907,6 +1429,16 @@ class MooMooAPI extends EventEmitter {
         value: WS
       });
     }
+    hats.forEach((hat) => {
+      if (hat.price <= 0 && !hat.dontSell) {
+        this.hatsOwned[hat.id] = true;
+      }
+    });
+    accessories.forEach((acc) => {
+      if (acc.price <= 0) {
+        this.accessoriesOwned[acc.id] = true;
+      }
+    });
   }
   initSocket() {
     var _a;
@@ -929,7 +1461,6 @@ class MooMooAPI extends EventEmitter {
           this.player.sid = payload[0];
           break;
         case S2CPacketType.UPDAE_PLAYERS:
-          this.emit("serverTick", packEvt);
           var players = [];
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
@@ -956,6 +1487,7 @@ class MooMooAPI extends EventEmitter {
             this.players[thisPlayer.sid].assign(thisPlayer);
             players.push(thisPlayer);
           }
+          this.emit("serverTick", new ServerTickEvent(players));
           break;
         case S2CPacketType.REMOVE_PLAYER:
           const player = this.getPlayerById(payload[0]);

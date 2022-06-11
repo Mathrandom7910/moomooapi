@@ -1,6 +1,6 @@
 {
   "name": "@mathrandom7910/moomooapi",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "main": "src/main.ts",
   "scripts": {
     "build": "tsc && vite build",
@@ -9,5 +9,8 @@
   "devDependencies": {
     "typescript": "^4.5.4",
     "vite": "^2.8.0"
+  },
+  "dependencies": {
+    "@mathrandom7910/pos": "^1.0.3"
   }
 }
