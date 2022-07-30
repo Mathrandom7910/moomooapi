@@ -1,17 +1,17 @@
 {
   "name": "@mathrandom7910/moomooapi",
-  "version": "0.1.7",
+  "version": "0.1.6",
   "main": "src/main.ts",
   "scripts": {
     "build": "tsc && vite build",
     "docs": "typedoc src/main.ts src/player.ts src/packets.ts src/events.ts src/misc.ts src/gameobject.ts src/data/gear/hats.ts src/data/gear/accessories.ts src/data/objects/items.ts src/data/objects/weapons.ts src/projectiles.ts",
-    "publish": "npm publish @mathrandom7910/moomooapi"
+    "publish": "npm publish --access public @mathrandom7910/moomooapi"
   },
   "devDependencies": {
     "typescript": "^4.5.4",
     "vite": "^2.8.0"
   },
   "dependencies": {
-    "@mathrandom7910/pos": "^1.0.3"
+    "@mathrandom7910/pos": "^1.0.6"
   }
 }
