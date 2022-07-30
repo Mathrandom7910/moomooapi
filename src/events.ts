@@ -1,6 +1,8 @@
+import { Pos } from "@mathrandom7910/pos";
 import { ObjectRemoveReason, IObject } from "./gameobject";
 import { C2SPacketType, RawC2SPacket, RawPacket, RawS2CPacket, S2CPacketType } from "./packets";
-import { IPlayerDat, Player } from "./player";
+import { IPlayerDat, Player, Posable } from "./player";
+import { Projectile } from "./projectiles";
 
 class Evt {
     constructor(public eventName: string) {
@@ -10,7 +12,6 @@ class Evt {
 interface Cancelable {
     isCanceled: boolean;
 }
-
 
 abstract class PacketEvent extends Evt{
     abstract type: C2SPacketType | S2CPacketType;
@@ -72,7 +73,7 @@ export class HealthEvent extends Evt {
 
 export class UpdatePlayerEvent extends Evt {
     constructor() {
-        super("updateplayer");
+        super("update_player");
     }
 }
 
@@ -96,9 +97,13 @@ export class ObjectAddEvent extends BuildingEvent {
  * Object remove event called when a building should be removed by the game
  */
 
-export class ObjectRemoveEvent extends BuildingEvent {
+export class ObjectRemoveEvent extends BuildingEvent implements Posable {
     constructor(building: IObject, public reason: ObjectRemoveReason) {
         super(building);
+    }
+    
+    getAsPos(): Pos {
+        return new Pos(this.building.x, this.building.y);
     }
 }
 
@@ -120,7 +125,19 @@ export class DatalessEvent extends Evt {
 
 export class ServerTickEvent extends Evt {
     constructor(public playerData: IPlayerDat[]) {
-        super("servertick")
+        super("server_tick")
+    }
+}
+
+export class ProjectileAddEvent extends Evt {
+    constructor(public projectile: Projectile) {
+        super("projectile_add");
+    }
+}
+
+export class ProjectileRemoveEvent extends Evt {
+    constructor(public projectile: Projectile) {
+        super("projectile_remove")
     }
 }
 
@@ -144,7 +161,9 @@ export interface PlayerEvents {
     addObject: ObjectAddEvent,
     removeObject: ObjectRemoveEvent,
     chat: ChatEvent,
-    serverTick: ServerTickEvent
+    serverTick: ServerTickEvent,
+    addProjectile: ProjectileAddEvent,
+    removeProjectile: ProjectileRemoveEvent
 }
 
 export class EventEmitter<Map> {

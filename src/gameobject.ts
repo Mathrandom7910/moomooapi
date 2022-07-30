@@ -1,4 +1,6 @@
-export interface IObject {
+import { Posable } from "./player";
+
+export interface IObject extends Posable {
     id: number,
     x: number,
     y: number,

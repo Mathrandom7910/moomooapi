@@ -3,6 +3,15 @@ import { WeaponIds } from "./data/objects/weapons";
 import { numu } from "./misc";
 import { Pos } from "@mathrandom7910/pos";
 
+export interface Posable {
+    /**
+     * Returns a position object which can be used to perform math calculations easily
+     * @returns Position object
+     */
+
+    getAsPos(): Pos;
+}
+
 /**
  * Player interface containing info sent on every game tick
  */
@@ -27,7 +36,7 @@ export interface IPlayerDat {
  * Player class containing information on a specific player
  */
 
-export class Player implements IPlayerDat {
+export class Player implements IPlayerDat, Posable {
     x: number = -2;
     y: number = -2;
     sid: number = -2;
@@ -64,12 +73,7 @@ export class Player implements IPlayerDat {
         this.zIndex = dat.zIndex;
     }
 
-    /**
-     * Returns a position object which can be used to perform math calculations easily
-     * @returns Position object
-     */
-
-    getAsPos() {
+    getAsPos(): Pos {
         return new Pos(this.x, this.y);
     }
 }

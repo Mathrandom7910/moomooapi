@@ -1,5 +1,5 @@
 
-import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent, ServerTickEvent } from "./events";
+import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent, ServerTickEvent, ProjectileAddEvent, ProjectileRemoveEvent } from "./events";
 import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
@@ -9,9 +9,13 @@ import { ItemIds } from "./data/objects/items";
 import { WeaponIds } from "./data/objects/weapons";
 import { HatIds, hats } from "./data/gear/hats";
 import { accessories, AccessoryIds } from "./data/gear/accessories";
+import { Projectile } from "./projectiles";
+import { Pos } from "@mathrandom7910/pos";
 
 var mLoc = <any> msgpack;
 export const msgpack2 = <typeof msgpack> mLoc.msgpack;
+
+var lastTime = Date.now();
 
 interface WST {
   hiddenSend(data: ArrayBufferLike | string | Blob | ArrayBufferView): void;
@@ -66,6 +70,8 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   hatsOwned: Record<number, boolean> = {};
 
   accessoriesOwned: Record<number, boolean> = {}
+
+  projectiles: Projectile[] = [];
 
   constructor(dynws = false) {
     super();
@@ -157,6 +163,15 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
         case S2CPacketType.UPDAE_PLAYERS:
           var players: IPlayerDat[] = [];
+          const timeNow = Date.now();
+          for(const projectile of this.projectiles) {
+            projectile.range -= (timeNow - lastTime) * projectile.speed;
+
+            if(projectile.range <= 0) {
+              this.removeProjectile(projectile.sid);
+            }
+          }
+
           for (let i = 0; i < payload[0].length; i += 13) {
             const plinf = payload[0].slice(i, i + 13);
             const thisPlayer: IPlayerDat = {
@@ -223,7 +238,10 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
                 scale: binf[4],
                 type: binf[5],
                 buildType: binf[6],
-                ownerSid: binf[7]
+                ownerSid: binf[7],
+                getAsPos() {
+                    return new Pos(this.x, this.y)
+                },
             }
             this.gameObjects[thisBuild.id] = thisBuild;
             this.emit("addObject", new ObjectAddEvent(thisBuild));
@@ -304,6 +322,16 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           this.hatsOwned[gearId] = true;
         }
 
+        break;
+
+        case S2CPacketType.ADD_PROJECTILE:
+        const projectile = new Projectile(payload[0], payload[1], payload[2], payload[3], payload[4], payload[5], payload[6], payload[7])
+        this.emit("addProjectile", new ProjectileAddEvent(projectile));
+        this.projectiles.push(projectile);
+        break;
+
+        case S2CPacketType.REMOVE_PROJECTILE:
+        this.removeProjectile(payload[0]);
         break;
       }
     });
@@ -470,6 +498,15 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
 
   chat(text: string) {
     this.sendBasic(C2SPacketType.CHAT, text);
+  }
+
+  removeProjectile(projectileSid: number) {
+    for(let i = 0; i < this.projectiles.length; i++) {
+      if(this.projectiles[i].sid == projectileSid) {
+        this.emit("removeProjectile", new ProjectileRemoveEvent(this.projectiles[i]));
+        this.projectiles.splice(i, 1);
+      }
+    }
   }
 }
 
