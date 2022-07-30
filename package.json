@@ -4,7 +4,8 @@
   "main": "src/main.ts",
   "scripts": {
     "build": "tsc && vite build",
-    "docs": "typedoc src/main.ts src/player.ts src/packets.ts src/events.ts src/misc.ts src/gameobject.ts src/data/gear/hats.ts src/data/gear/accessories.ts src/data/objects/items.ts src/data/objects/weapons.ts"
+    "docs": "typedoc src/main.ts src/player.ts src/packets.ts src/events.ts src/misc.ts src/gameobject.ts src/data/gear/hats.ts src/data/gear/accessories.ts src/data/objects/items.ts src/data/objects/weapons.ts src/projectiles.ts",
+    "publish": "npm publish @mathrandom7910/moomooapi"
   },
   "devDependencies": {
     "typescript": "^4.5.4",
