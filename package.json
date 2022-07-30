@@ -1,6 +1,6 @@
 {
   "name": "@mathrandom7910/moomooapi",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "main": "src/main.ts",
   "scripts": {
     "build": "tsc && vite build",
