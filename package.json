@@ -1,6 +1,6 @@
 {
   "name": "@mathrandom7910/moomooapi",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "main": "./main.js",
   "scripts": {
     "compile": "tsc",
