@@ -4,8 +4,9 @@ import { Pos } from "@mathrandom7910/pos";
 /**
  * Player class containing information on a specific player
  */
-export class Player {
+export class Player extends Pos {
     constructor() {
+        super(...arguments);
         this.x = -2;
         this.y = -2;
         this.sid = -2;
@@ -41,7 +42,7 @@ export class Player {
         this.zIndex = dat.zIndex;
     }
     getAsPos() {
-        return new Pos(this.x, this.y);
+        return this;
     }
 }
 /**

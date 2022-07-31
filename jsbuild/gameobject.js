@@ -9,6 +9,9 @@ export class GameObject extends Pos {
         this.buildType = buildType;
         this.ownerSid = ownerSid;
     }
+    getAsPos() {
+        return this;
+    }
 }
 /**
  * Reason an object was removed from the game

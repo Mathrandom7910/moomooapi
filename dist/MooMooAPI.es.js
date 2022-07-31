@@ -335,8 +335,9 @@ var WeaponIds = /* @__PURE__ */ ((WeaponIds2) => {
   WeaponIds2[WeaponIds2["MUSKET"] = 15] = "MUSKET";
   return WeaponIds2;
 })(WeaponIds || {});
-class Player {
+class Player extends Pos_1 {
   constructor() {
+    super(...arguments);
     this.x = -2;
     this.y = -2;
     this.sid = -2;
@@ -372,7 +373,7 @@ class Player {
     this.zIndex = dat.zIndex;
   }
   getAsPos() {
-    return new Pos_1(this.x, this.y);
+    return this;
   }
 }
 class SelfPlayer extends Player {
@@ -923,6 +924,9 @@ class GameObject extends Pos_1 {
     this.type = type;
     this.buildType = buildType;
     this.ownerSid = ownerSid;
+  }
+  getAsPos() {
+    return this;
   }
 }
 var ObjectRemoveReason = /* @__PURE__ */ ((ObjectRemoveReason2) => {

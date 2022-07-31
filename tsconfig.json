@@ -13,6 +13,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
+    "declaration": true,
+    "declarationDir": "./jsbuild",
     "allowJs": true,
     "outDir": "./jsbuild"
   },
