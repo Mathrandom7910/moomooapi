@@ -1,63 +1,31 @@
 import { ItemIds } from "./data/objects/items";
 import { WeaponIds } from "./data/objects/weapons";
-import { numu } from "./misc";
 import { Pos } from "@mathrandom7910/pos";
-
-export interface Posable {
-    /**
-     * Returns a position object which can be used to perform math calculations easily
-     * @returns Position object
-     */
-
-    getAsPos(): Pos;
-}
-
-/**
- * Player interface containing info sent on every game tick
- */
-
-export interface IPlayerDat {
-    x: number;
-    y: number;
-    sid: number;
-    dir: number;
-    currentObject: number;
-    wep: number;
-    variant: number;
-    tribe: string;
-    isLeader: boolean;
-    hat: number;
-    acc: number;
-    isSkull: boolean;
-    zIndex: number;
-}
-
 /**
  * Player class containing information on a specific player
  */
-
-export class Player extends Pos implements IPlayerDat, Posable {
-    x: number = -2;
-    y: number = -2;
-    sid: number = -2;
-    id: string = "NULL";
-    dir: number = 0;
-    currentObject: number = -2;
-    wep: number = -2;
-    variant: number = -2;
-    tribe: string = "NULL";
-    isLeader: boolean = false;
-    hat: number = -2;
-    acc: number = -2;
-    isSkull: boolean = false;
-    zIndex: number = -1;
-    health: number = 100;
-    name = "NULL";
-    chatMessage: string | null = null;
-    messageTimeout = -1;
-
-
-    assign(dat: IPlayerDat) {
+export class Player {
+    constructor() {
+        this.x = -2;
+        this.y = -2;
+        this.sid = -2;
+        this.id = "NULL";
+        this.dir = 0;
+        this.currentObject = -2;
+        this.wep = -2;
+        this.variant = -2;
+        this.tribe = "NULL";
+        this.isLeader = false;
+        this.hat = -2;
+        this.acc = -2;
+        this.isSkull = false;
+        this.zIndex = -1;
+        this.health = 100;
+        this.name = "NULL";
+        this.chatMessage = null;
+        this.messageTimeout = -1;
+    }
+    assign(dat) {
         this.x = dat.x;
         this.y = dat.y;
         this.sid = dat.sid;
@@ -72,75 +40,60 @@ export class Player extends Pos implements IPlayerDat, Posable {
         this.isSkull = dat.isSkull;
         this.zIndex = dat.zIndex;
     }
-
-    getAsPos(): Player {
-        return this;
+    getAsPos() {
+        return new Pos(this.x, this.y);
     }
 }
-
-
-
-export type WeaponsType = [number, numu];
-export type ItemsType = [number, number, number, number, numu, numu, numu, numu];
-
 /**
  * Self player class with more data than that of the player class
  */
-
 export class SelfPlayer extends Player {
-    weapons: WeaponsType = [WeaponIds.TOOL_HAMMER, undefined];
-    //[0, 3, 6, 10];
-    items: ItemsType = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, undefined, undefined, undefined, undefined];
-
+    constructor() {
+        super(...arguments);
+        this.weapons = [WeaponIds.TOOL_HAMMER, undefined];
+        //[0, 3, 6, 10];
+        this.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, undefined, undefined, undefined, undefined];
+    }
     getFoodType() {
         return this.items[0];
     }
-
     getWallType() {
         return this.items[1];
     }
-
     getSpikeType() {
         return this.items[2];
     }
-
     getMillType() {
         return this.items[3];
     }
-
-    searchForId(id: number) {
-        for(let i of this.items) {
-            if(i == id) return i;
+    searchForId(id) {
+        for (let i of this.items) {
+            if (i == id)
+                return i;
         }
         return null;
     }
-
     getSapplingType() {
         return this.searchForId(ItemIds.SAPPLING);
     }
-
     getMineType() {
         return this.searchForId(ItemIds.MINE);
     }
-
     getSpecialType() {
         return this.searchForId(ItemIds.TURRET) || this.searchForId(ItemIds.BLOCKER) || this.searchForId(ItemIds.HEALING_PAD) || this.searchForId(ItemIds.PLATFORM) || this.searchForId(ItemIds.TELEPORTER);
     }
-
     /**
-     * 
+     *
      * @returns The type of pad selected at age 4 (boost or trap)
      */
-
     getPadType() {
         return this.items[4] || null;
     }
-
     getPrimaryType() {
         return this.weapons[0];
     }
-
     getSecondaryType() {
         return this.weapons[1];
     }
 }
+//# sourceMappingURL=player.js.map

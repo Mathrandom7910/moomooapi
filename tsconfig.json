@@ -9,11 +9,12 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "noEmit": true,
+    // "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "allowJs": true
+    "allowJs": true,
+    "outDir": "./jsbuild"
   },
   "include": ["src"]
 }

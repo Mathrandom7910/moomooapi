@@ -1,6 +1,6 @@
 
 import { ObjectAddEvent as ObjectAddEvent, EventEmitter, HealthEvent, PacketReceiveEvent, PacketSendEvent, PlayerEvent, PlayerEvents, ObjectRemoveEvent, ChatEvent, ServerTickEvent, ProjectileAddEvent, ProjectileRemoveEvent } from "./events";
-import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
+import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./data/network/packets";
 import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
 import { Repeater, SkinColours } from "./misc";

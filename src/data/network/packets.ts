@@ -5,10 +5,39 @@
  */
 
 export enum C2SPacketType {
+    /**
+    * Packet sent to request a respawn
+    * 
+    * `["sp", [{name: nameString, moofol: followBool, skin: skinNumber}]]`
+     */
     SPAWN = "sp",
+
+    /**
+     * Packet sent to send a message to players nearby
+     * 
+     * `["ch", [chatString]]`
+     */
     CHAT = "ch",
+
+    /**
+     * Packet sent to start/stop attacking
+     * 
+     * `["c", [startStopBoolean, radicalDirectionNumber]]`
+     */
     ATTACK ="c",
+
+    /**
+     * Packet sent to test the player's ping
+     * 
+     * `["pp", []]`
+     */
     PING = "pp",
+
+    /**
+     * Packet sent to set the player's direction on the server
+     * 
+     * `["2", [radicalDirectionNumber]]`
+     */
     SET_ANGLE = "2",
     SELECT_ITEM = "5",
     UPGRADE = "6",

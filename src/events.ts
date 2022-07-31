@@ -1,6 +1,6 @@
 import { Pos } from "@mathrandom7910/pos";
 import { ObjectRemoveReason, GameObject } from "./gameobject";
-import { C2SPacketType, RawC2SPacket, RawPacket, RawS2CPacket, S2CPacketType } from "./packets";
+import { C2SPacketType, RawC2SPacket, RawPacket, RawS2CPacket, S2CPacketType } from "./data/network/packets";
 import { IPlayerDat, Player, Posable } from "./player";
 import { Projectile } from "./projectiles";
 
