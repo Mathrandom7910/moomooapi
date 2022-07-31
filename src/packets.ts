@@ -12,7 +12,7 @@ export enum C2SPacketType {
     SET_ANGLE = "2",
     SELECT_ITEM = "5",
     UPGRADE = "6",
-    AUTO_ATTACK = "7",
+    SET_ATTACK_STATE = "7",
     CREATE_TRIBE = "8",
     LEAVE_TRIBE = "9",
     REQUEST_JOIN_TRIBE = "10",

@@ -1,14 +1,9 @@
-import { Posable } from "./player";
+import { Pos } from "@mathrandom7910/pos";
 
-export interface IObject extends Posable {
-    id: number,
-    x: number,
-    y: number,
-    dir: number,
-    scale: number,
-    type: number,
-    buildType: number,
-    ownerSid: number
+export class GameObject extends Pos {
+    constructor(public id: number, x: number, y: number, public dir: number, public scale: number, public type: number, public buildType: number, public ownerSid: number) {
+        super(x, y)
+    }
 }
 
 /**

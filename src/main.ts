@@ -4,7 +4,7 @@ import { C2SPacketType, RawC2SPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player, SelfPlayer } from "./player";
 import * as msgpack from "./msgpack"
 import { Repeater, SkinColours } from "./misc";
-import { ObjectRemoveReason, IObject } from "./gameobject";
+import { ObjectRemoveReason, GameObject } from "./gameobject";
 import { ItemIds } from "./data/objects/items";
 import { WeaponIds } from "./data/objects/weapons";
 import { HatIds, hats } from "./data/gear/hats";
@@ -59,7 +59,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * Array of game objects that are sent to the client and still exist
    */
 
-  gameObjects: IObject[] = [];
+  gameObjects: GameObject[] = [];
 
   /**
    * Boolean value if the player is alive or not
@@ -72,6 +72,8 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   accessoriesOwned: Record<number, boolean> = {}
 
   projectiles: Projectile[] = [];
+
+  isAutoAtk = false;
 
   constructor(dynws = false) {
     super();
@@ -108,8 +110,16 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
           this.send = (m) => {
             const packEv = new PacketSendEvent(msgpack2.decode(new Uint8Array(<ArrayBuffer> m)));
             that.emit("packetSend", packEv);
-            if(packEv.isCanceled) return;
-            if(packEv.type == C2SPacketType.SPAWN) that.alive = true;
+            if(packEv.isCanceled) {
+              return;
+            } else if(packEv.type == C2SPacketType.SPAWN){
+              that.alive = true;
+            } else if(packEv.type == C2SPacketType.SET_ATTACK_STATE) {
+              if(packEv.payload[0]) {
+                that.isAutoAtk = !that.isAutoAtk;
+              }
+            }
+
             this.hiddenSend(m);
           }
 
@@ -230,19 +240,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         case S2CPacketType.ADD_OBJECT:
           for (let i = 0; i < payload[0].length; i += 8) {
             const binf = payload[0].slice(i, i + 8);
-            const thisBuild: IObject = {
-                id: binf[0],
-                x: binf[1],
-                y: binf[2],
-                dir: binf[3],
-                scale: binf[4],
-                type: binf[5],
-                buildType: binf[6],
-                ownerSid: binf[7],
-                getAsPos() {
-                    return new Pos(this.x, this.y)
-                },
-            }
+            const thisBuild = new GameObject(binf[0], binf[1], binf[2], binf[3], binf[4], binf[5], binf[6], binf[7]);
             this.gameObjects[thisBuild.id] = thisBuild;
             this.emit("addObject", new ObjectAddEvent(thisBuild));
           }
@@ -275,6 +273,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         break;
 
         case S2CPacketType.DEATH:
+          this.isAutoAtk = false;
           this.player.weapons = [WeaponIds.TOOL_HAMMER, undefined];
           this.player.items = [ItemIds.APPLE, ItemIds.WOOD_WALL, ItemIds.SPIKE, ItemIds.WINDMILL, undefined, undefined, undefined, undefined];
         break;
@@ -464,8 +463,8 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
     this.setWeapon(this.player.wep);
   }
 
-  toggleAutoFire() {
-    this.sendBasic(C2SPacketType.AUTO_ATTACK, 1);
+  toggleAutoAttack() {
+    this.sendBasic(C2SPacketType.SET_ATTACK_STATE, 1);
   }
 
   setGear(buy: boolean, id: HatIds | AccessoryIds, isAccessory: boolean) {
@@ -507,6 +506,14 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         this.projectiles.splice(i, 1);
       }
     }
+  }
+
+  setDirection(dir: number) {
+    this.sendBasic(C2SPacketType.SET_ANGLE, dir);
+  }
+
+  lookAt(pos: Pos) {
+    this.setDirection(this.player.getAsPos().dirTo(pos));
   }
 }
 

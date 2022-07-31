@@ -1,5 +1,5 @@
 import { Pos } from "@mathrandom7910/pos";
-import { ObjectRemoveReason, IObject } from "./gameobject";
+import { ObjectRemoveReason, GameObject } from "./gameobject";
 import { C2SPacketType, RawC2SPacket, RawPacket, RawS2CPacket, S2CPacketType } from "./packets";
 import { IPlayerDat, Player, Posable } from "./player";
 import { Projectile } from "./projectiles";
@@ -78,7 +78,7 @@ export class UpdatePlayerEvent extends Evt {
 }
 
 class BuildingEvent extends Evt {
-    constructor(public building: IObject) {
+    constructor(public building: GameObject) {
         super("build");
     }
 }
@@ -88,7 +88,7 @@ class BuildingEvent extends Evt {
  */
 
 export class ObjectAddEvent extends BuildingEvent {
-    constructor(building: IObject) {
+    constructor(building: GameObject) {
         super(building);
     }
 }
@@ -98,7 +98,7 @@ export class ObjectAddEvent extends BuildingEvent {
  */
 
 export class ObjectRemoveEvent extends BuildingEvent implements Posable {
-    constructor(building: IObject, public reason: ObjectRemoveReason) {
+    constructor(building: GameObject, public reason: ObjectRemoveReason) {
         super(building);
     }
     
