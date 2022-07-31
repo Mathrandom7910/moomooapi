@@ -23,20 +23,20 @@ export class Repeater {
      * Repeater constructor
      * @param cb Callback function to call on every interval
      * @param msInterval The time (milliseconds) to repeat the action
-     * @param keyCode The keycode on if it should start or stop on action
+     * @param code The keycode on if it should start or stop on action
      */
-    constructor(cb, msInterval, keyCode) {
+    constructor(cb, msInterval, code) {
         this.cb = cb;
         this.msInterval = msInterval;
-        this.keyCode = keyCode;
+        this.code = code;
         this.intervalId = null;
     }
     /**
      * Starts the repeater if the given keycode matches the one input
-     * @param keyCode The keycode to check
+     * @param code The code to check
      */
-    start(keyCode) {
-        if (this.keyCode != keyCode || this.intervalId != null)
+    start(code) {
+        if (this.code != code || this.intervalId != null)
             return;
         this.intervalId = setInterval(this.cb, this.msInterval);
     }
@@ -45,10 +45,11 @@ export class Repeater {
      * @param keyCode The keycode to check
      */
     stop(keyCode) {
-        if (this.keyCode != keyCode || this.intervalId == null)
+        if (this.code != keyCode || this.intervalId == null)
             return;
         clearInterval(this.intervalId);
         this.intervalId = null;
     }
 }
+export const StringRepeater = (Repeater);
 //# sourceMappingURL=misc.js.map

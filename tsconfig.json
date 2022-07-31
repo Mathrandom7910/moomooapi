@@ -14,9 +14,9 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "declaration": true,
-    "declarationDir": "./jsbuild",
+    "declarationDir": "",
     "allowJs": true,
-    "outDir": "./jsbuild"
+    "outDir": ""
   },
   "include": ["src"]
 }

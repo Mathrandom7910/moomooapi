@@ -17,28 +17,31 @@ export declare enum SkinColours {
 /**
  * Repeater class used to repeat a specific action
  */
-export declare class Repeater {
+export declare class Repeater<T> {
     cb: Function;
     msInterval: number;
-    keyCode: number;
+    code: T;
     intervalId: numull;
     /**
      * Repeater constructor
      * @param cb Callback function to call on every interval
      * @param msInterval The time (milliseconds) to repeat the action
-     * @param keyCode The keycode on if it should start or stop on action
+     * @param code The keycode on if it should start or stop on action
      */
-    constructor(cb: Function, msInterval: number, keyCode: number);
+    constructor(cb: Function, msInterval: number, code: T);
     /**
      * Starts the repeater if the given keycode matches the one input
-     * @param keyCode The keycode to check
+     * @param code The code to check
      */
-    start(keyCode: number): void;
+    start(code: T): void;
     /**
      * Stops the reapeater if the keycode matches the one input
      * @param keyCode The keycode to check
      */
-    stop(keyCode: number): void;
+    stop(keyCode: T): void;
 }
+export declare const StringRepeater: {
+    new (cb: Function, msInterval: number, code: string): Repeater<string>;
+};
 export declare type numu = number | undefined;
 export declare type numull = number | null;
