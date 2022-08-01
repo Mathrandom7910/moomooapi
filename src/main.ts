@@ -496,7 +496,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
   }
 
   chat(text: string) {
-    this.sendBasic(C2SPacketType.CHAT, text);
+    this.sendBasic(C2SPacketType.CHAT, text.substring(0, 30));
   }
 
   removeProjectile(projectileSid: number) {
