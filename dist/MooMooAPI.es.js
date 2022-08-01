@@ -897,19 +897,19 @@ var SkinColours = /* @__PURE__ */ ((SkinColours2) => {
   return SkinColours2;
 })(SkinColours || {});
 class Repeater {
-  constructor(cb, msInterval, keyCode) {
+  constructor(cb, msInterval, code) {
     this.cb = cb;
     this.msInterval = msInterval;
-    this.keyCode = keyCode;
+    this.code = code;
     this.intervalId = null;
   }
-  start(keyCode) {
-    if (this.keyCode != keyCode || this.intervalId != null)
+  start(code) {
+    if (this.code != code || this.intervalId != null)
       return;
     this.intervalId = setInterval(this.cb, this.msInterval);
   }
   stop(keyCode) {
-    if (this.keyCode != keyCode || this.intervalId == null)
+    if (this.code != keyCode || this.intervalId == null)
       return;
     clearInterval(this.intervalId);
     this.intervalId = null;
@@ -1787,7 +1787,7 @@ class MooMooAPI extends EventEmitter {
     this.equipGear(id, true);
   }
   chat(text) {
-    this.sendBasic(C2SPacketType.CHAT, text);
+    this.sendBasic(C2SPacketType.CHAT, text.substring(0, 30));
   }
   removeProjectile(projectileSid) {
     for (let i = 0; i < this.projectiles.length; i++) {
