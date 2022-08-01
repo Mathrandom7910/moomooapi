@@ -59,7 +59,7 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
    * Array of game objects that are sent to the client and still exist
    */
 
-  gameObjects: GameObject[] = [];
+  gameObjects: Record<number, GameObject> = [];
 
   /**
    * Boolean value if the player is alive or not
@@ -252,12 +252,12 @@ export class MooMooAPI extends EventEmitter<PlayerEvents>{
         break;
 
         case S2CPacketType.REMOVE_ALL_OBJECTS:
-          for(let i = 0; i < this.gameObjects.length; i++) {
+          for(let i in this.gameObjects) {
             const ind = this.gameObjects[i];
-            if(!ind) continue;
             if(ind.ownerSid == payload[0]) {
               this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[i], ObjectRemoveReason.PLAYERLEAVE));
-              this.gameObjects.slice(i, 1);
+              // this.gameObjects.slice(i, 1);
+              delete this.gameObjects[i];
             }
           }
         break;

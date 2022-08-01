@@ -1652,13 +1652,11 @@ class MooMooAPI extends EventEmitter {
           delete this.gameObjects[payload[0]];
           break;
         case S2CPacketType.REMOVE_ALL_OBJECTS:
-          for (let i = 0; i < this.gameObjects.length; i++) {
+          for (let i in this.gameObjects) {
             const ind = this.gameObjects[i];
-            if (!ind)
-              continue;
             if (ind.ownerSid == payload[0]) {
               this.emit("removeObject", new ObjectRemoveEvent(this.gameObjects[i], ObjectRemoveReason.PLAYERLEAVE));
-              this.gameObjects.slice(i, 1);
+              delete this.gameObjects[i];
             }
           }
           break;
